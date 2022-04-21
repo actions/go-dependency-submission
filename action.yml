@@ -1,0 +1,10 @@
+name: 'TypeScripy Library for Creating Dependency Snapshots'
+description: 'Detects dependencies in projects'
+author: 'lorenanicole'
+inputs:
+  token:
+    required: true
+    description: 'Personal access token for the GitHub API'
+runs:
+  using: 'node16'
+  main: 'dist/index.js'

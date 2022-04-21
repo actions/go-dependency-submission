@@ -4,7 +4,13 @@
   "description": "Go Snapshot Action",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc",
+    "format": "prettier --write '**/*.ts'",
+    "format-check": "prettier --check '**/*.ts'",
+    "lint": "eslint --fix src/**/*.ts test/**/*.ts",
+    "package": "ncc build --source-map --license licenses.txt",
+    "test": "jest",
+    "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
   "repository": {
     "type": "git",
@@ -16,5 +22,17 @@
   "bugs": {
     "url": "https://github.com/dsp-testing/go-snapshot-action/issues"
   },
-  "homepage": "https://github.com/dsp-testing/go-snapshot-action#readme"
+  "homepage": "https://github.com/dsp-testing/go-snapshot-action#readme",
+  "dependencies": {
+    "@github/dependency-snapshot-action": "^1.0.0"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^5.20.0",
+    "@typescript-eslint/parser": "^5.20.0",
+    "eslint": "^8.13.0",
+    "eslint-config-standard": "^17.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-n": "^15.1.0",
+    "eslint-plugin-promise": "^6.0.0"
+  }
 }
