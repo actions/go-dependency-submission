@@ -1,10 +1,25 @@
-name: 'TypeScripy Library for Creating Dependency Snapshots'
-description: 'Detects dependencies in projects'
+name: 'Go Action for Creating Dependency Snapshots'
+description: 'Detects go dependencies in projects using go mod graph utility'
 author: 'lorenanicole'
 inputs:
   token:
     required: true
     description: 'Personal access token for the GitHub API'
+  detector-name: 
+    required: false
+    description: 'Name of the detector running the go action e.g. Go Snapshot Detector'
+    default: 'Go Snapshot Action'
+  detector-url:
+    required: false
+    description: 'URL of the detector running the go action e.g. http://github.com/dsp-testing/go-snapshot-action'
+    default: 'http://github.com/dsp-testing/go-snapshot-action'
+  detector-version:
+    required: false
+    description: 'Version of the detector running the go action e.g. 0.0.1'
+    default: '0.0.1'
+  metadata:
+    required: false
+    description: 'User provided map of max key/value pairs of metadata to include with the snapshot e.g. {"lastModified": "12-31-2022"}'
 runs:
   using: 'node16'
   main: 'dist/index.js'

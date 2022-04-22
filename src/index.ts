@@ -1,3 +1,4 @@
+import * as core from '@actions/core'
 import { run } from '@github/dependency-snapshot-action'
 import {
   Entry,
@@ -56,13 +57,9 @@ const metadata = {
   nullz: null
 }
 const detector = {
-  name: 'Typescript Snapshot Detector',
-  url: 'https://github.com/github/dependency_snapshot_action',
-  version: '0.0.1'
+  name: core.getInput('detector-name'),
+  url: core.getInput('detector-url'),
+  version: core.getInput('detector-version')
 }
 
-run(
-  parseDependents,
-  { command: 'go mod graph' },
-  { metadata, detector }
-)
+run(parseDependents, { command: 'go mod graph' }, { metadata, detector })
