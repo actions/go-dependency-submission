@@ -50,12 +50,7 @@ parseDependents = function (contents: string) {
   return entries
 }
 
-const metadata = {
-  foo: 1.0,
-  bar: false,
-  baz: 'somethingsomething',
-  nullz: null
-}
+const metadata = JSON.parse(core.getInput('metadata'))
 const detector = {
   name: core.getInput('detector-name'),
   url: core.getInput('detector-url'),
