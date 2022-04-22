@@ -59,8 +59,7 @@ const detector = {
 
 // If provided, set the metadata provided from the action workflow input
 const metadataInput = core.getInput('metadata')
-
-if (metadataInput === undefined) {
+if (metadataInput.length < 1) {
   run(parseDependents, { command: 'go mod graph' }, { detector })
 } else {
   const metadata = JSON.parse(metadataInput)
