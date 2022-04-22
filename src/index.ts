@@ -17,28 +17,52 @@ parseDependents = function (contents: string) {
   const entries: ParsedDependencies = {}
   const repoName = splitStdoutArr[0][0]
   splitStdoutArr.forEach((line: string[]) => {
-    if (line.length < 2 || line === undefined) return // skip empty lines
+    if (line === undefined || line.length < 2) return // skip empty lines
 
-    let entry: Entry
-    let dependencyString = `pkg:golang/${line[0]}`
+    let targetEntry: Entry
+    const targetPkg = `pkg:golang/${line[0]}`
+    let dependencyEntry: Entry
+    const dependencyPkg = `pkg:golang/${line[1]}`
 
     const matchFound = line[0].match(repoName)
     if (matchFound && matchFound.index != null) {
-      dependencyString = `pkg:golang/${line[1]}`
-      entries[dependencyString] = new Entry(dependencyString, 'direct')
+      entries[dependencyPkg] = new Entry(dependencyPkg, 'direct')
       return
     }
 
-    if (dependencyString in entries) {
-      entry = entries[dependencyString]
+    if (targetPkg in entries) {
+      targetEntry = entries[targetPkg]
     } else {
-      entry = new Entry(dependencyString, 'indirect')
-      entries[dependencyString] = entry
+      targetEntry = new Entry(targetPkg, 'indirect')
+      entries[targetPkg] = targetEntry
     }
 
-    entry.addDependency(new Entry(`pkg:golang/${line[1]}`, 'indirect'))
+    if (dependencyPkg in entries) {
+      dependencyEntry = entries[dependencyPkg]
+    } else {
+      dependencyEntry = new Entry(dependencyPkg, 'indirect')
+      entries[dependencyPkg] = dependencyEntry
+    }
+
+    targetEntry.addDependency(dependencyEntry)
   })
   return entries
 }
 
-run(parseDependents, undefined, 'go mod graph')
+const metadata = {
+  foo: 1.0,
+  bar: false,
+  baz: 'somethingsomething',
+  nullz: null
+}
+const detector = {
+  name: 'Typescript Snapshot Detector',
+  url: 'https://github.com/github/dependency_snapshot_action',
+  version: '0.0.1'
+}
+
+run(
+  parseDependents,
+  { command: 'go mod graph' },
+  { metadata, detector }
+)
