@@ -7,9 +7,10 @@
     "build": "tsc",
     "format": "prettier --write '**/*.ts'",
     "format-check": "prettier --check '**/*.ts'",
-    "lint": "eslint --fix src/**/*.ts",
+    "lint": "eslint --fix src/**/*.ts test/**/*.ts",
     "package": "ncc build --source-map --license licenses.txt",
-    "all": "npm run build && npm run format && npm run lint && npm run package"
+    "test": "jest",
+    "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
   "repository": {
     "type": "git",
@@ -32,6 +33,7 @@
     "eslint-plugin-promise": "^6.0.0"
   },
   "dependencies": {
-    "@github/dependency-snapshot-action": "^1.0.0"
+    "@github/dependency-snapshot-action": "^1.0.0",
+    "jest": "^27.5.1"
   }
 }

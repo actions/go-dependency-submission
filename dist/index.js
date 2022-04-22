@@ -1,41 +1,15 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 212:
-/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+/***/ 2850:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    var desc = Object.getOwnPropertyDescriptor(m, k);
-    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-      desc = { enumerable: true, get: function() { return m[k]; } };
-    }
-    Object.defineProperty(o, k2, desc);
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(5127));
-const dependency_snapshot_action_1 = __nccwpck_require__(8049);
+exports.parseDependents = void 0;
 const processor_1 = __nccwpck_require__(9642);
-let parseDependents;
-// eslint-disable-next-line prefer-const
-parseDependents = function (contents) {
+function parseDependents(contents) {
     const stdoutArr = contents.split('\n');
     const splitStdoutArr = stdoutArr.map(function (line) {
         return line.split(' ');
@@ -71,7 +45,45 @@ parseDependents = function (contents) {
         targetEntry.addDependency(dependencyEntry);
     });
     return entries;
+}
+exports.parseDependents = parseDependents;
+
+
+/***/ }),
+
+/***/ 212:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+const core = __importStar(__nccwpck_require__(5127));
+const dependency_snapshot_action_1 = __nccwpck_require__(8049);
+const go_mod_parser_1 = __nccwpck_require__(2850);
+const parseDependentsFunc = go_mod_parser_1.parseDependents;
 // Set the detector information provided from the action workflow input
 const detector = {
     name: core.getInput('detector-name'),
@@ -81,11 +93,11 @@ const detector = {
 // If provided, set the metadata provided from the action workflow input
 const metadataInput = core.getInput('metadata');
 if (metadataInput.length < 1) {
-    (0, dependency_snapshot_action_1.run)(parseDependents, { command: 'go mod graph' }, { detector });
+    (0, dependency_snapshot_action_1.run)(parseDependentsFunc, { command: 'go mod graph' }, { detector });
 }
 else {
     const metadata = JSON.parse(metadataInput);
-    (0, dependency_snapshot_action_1.run)(parseDependents, { command: 'go mod graph' }, { metadata, detector });
+    (0, dependency_snapshot_action_1.run)(parseDependentsFunc, { command: 'go mod graph' }, { metadata, detector });
 }
 
 
