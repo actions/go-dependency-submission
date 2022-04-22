@@ -72,13 +72,21 @@ parseDependents = function (contents) {
     });
     return entries;
 };
-const metadata = JSON.parse(core.getInput('metadata'));
+// Set the detector information provided from the action workflow input
 const detector = {
     name: core.getInput('detector-name'),
     url: core.getInput('detector-url'),
     version: core.getInput('detector-version')
 };
-(0, dependency_snapshot_action_1.run)(parseDependents, { command: 'go mod graph' }, { metadata, detector });
+// If provided, set the metadata provided from the action workflow input
+const metadataInput = core.getInput('metadata');
+if (metadataInput === undefined) {
+    (0, dependency_snapshot_action_1.run)(parseDependents, { command: 'go mod graph' }, { detector });
+}
+else {
+    const metadata = JSON.parse(metadataInput);
+    (0, dependency_snapshot_action_1.run)(parseDependents, { command: 'go mod graph' }, { metadata, detector });
+}
 
 
 /***/ }),
