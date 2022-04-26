@@ -33,7 +33,7 @@
     "eslint-plugin-promise": "^6.0.0"
   },
   "dependencies": {
-    "@github/dependency-snapshot-action": "^1.0.0",
+    "@github/dependency-submission-toolkit": "^1.0.0",
     "jest": "^27.5.1"
   }
 }

@@ -1,7 +1,7 @@
 import {
   Entry,
   ParsedDependencies
-} from '@github/dependency-snapshot-action/dist/processor'
+} from '@github/dependency-submission-toolkit/dist/processor'
 
 export function parseDependents (contents: string) {
   const stdoutArr: string[] = contents.split('\n')
