@@ -1,14 +1,14 @@
 # Go Snapshot Action
 
-An action that creates a dependency submission using `go mod graph`.
+An Action that creates a dependency submission using `go mod graph`.
 
-To configure, you'll need to provide a GitHub token. Additional optional inputs include: `detector-name`, `detector-url`, `detector-version`, and `metadata` - a JSON of max eight keys to provide with the snapshot. 
+Optional inputs for the Action include: `detector-name`, `detector-url`, `detector-version`, and `metadata` - a JSON of max eight keys to provide with the snapshot.
 
 ```
 name: Run snapshot action
-uses: ./go-snapshot-action
+uses: @dsp-testing/go-snapshot-action
 with:
-    token: ${{ secrets.GITHUB_TOKEN }}
+    # All of the below have defaults, but can be overriden manually
     detector-name: go snapshot action
     detector-url: ${{ github.server_url }}/${{ github.repository }}
     detector-version: 1.0.0

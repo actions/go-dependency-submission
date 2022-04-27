@@ -3,8 +3,9 @@ description: 'Detects go dependencies in projects using go mod graph utility'
 author: 'lorenanicole'
 inputs:
   token:
-    required: true
-    description: 'Personal access token for the GitHub API'
+    description: "GitHub Personal Access Token (PAT). Defaults to PAT provided by Action runner"
+    required: false
+    default: ${{ github.token }}
   detector-name: 
     required: false
     description: 'Name of the detector running the go action e.g. Go Snapshot Detector'
