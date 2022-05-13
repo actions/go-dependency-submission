@@ -1,14 +1,14 @@
 require('./sourcemap-register.js');/******/ (() => { // webpackBootstrap
 /******/ 	var __webpack_modules__ = ({
 
-/***/ 2850:
+/***/ 4311:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.parseDependents = void 0;
-const processor_1 = __nccwpck_require__(9642);
+const processor_1 = __nccwpck_require__(6084);
 function parseDependents(contents) {
     const stdoutArr = contents.split('\n');
     const splitStdoutArr = stdoutArr.map(function (line) {
@@ -51,7 +51,7 @@ exports.parseDependents = parseDependents;
 
 /***/ }),
 
-/***/ 212:
+/***/ 2280:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -79,10 +79,25 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-const core = __importStar(__nccwpck_require__(5127));
-const dependency_snapshot_action_1 = __nccwpck_require__(8049);
-const go_mod_parser_1 = __nccwpck_require__(2850);
+const core = __importStar(__nccwpck_require__(7538));
+const dependency_submission_toolkit_1 = __nccwpck_require__(2128);
+const go_mod_parser_1 = __nccwpck_require__(4311);
+const path = __importStar(__nccwpck_require__(1017));
+const process = __importStar(__nccwpck_require__(7282));
+const execa_1 = __importDefault(__nccwpck_require__(9531));
 const parseDependentsFunc = go_mod_parser_1.parseDependents;
 // Set the detector information provided from the action workflow input
 const detector = {
@@ -90,20 +105,52 @@ const detector = {
     url: core.getInput('detector-url'),
     version: core.getInput('detector-version')
 };
-// If provided, set the metadata provided from the action workflow input
-const metadataInput = core.getInput('metadata');
-if (metadataInput.length < 1) {
-    (0, dependency_snapshot_action_1.run)(parseDependentsFunc, { command: 'go mod graph' }, { detector });
+function searchForFile(filename) {
+    return __awaiter(this, void 0, void 0, function* () {
+        console.log(`searching for ${filename} in ${process.cwd()}`);
+        const { stdout } = yield (0, execa_1.default)('find', [
+            process.cwd(),
+            '-name',
+            filename
+        ]);
+        const dirs = stdout
+            .split('\n')
+            .filter(s => s.length > 0)
+            // remove the file name
+            .map((filename) => path.dirname(filename))
+            // map to absolute path
+            .map((pathname) => path.resolve(process.cwd(), pathname));
+        return dirs;
+    });
 }
-else {
-    const metadata = JSON.parse(metadataInput);
-    (0, dependency_snapshot_action_1.run)(parseDependentsFunc, { command: 'go mod graph' }, { metadata, detector });
+// Enumerate directories
+function detect() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const goModPaths = searchForFile('go.mod');
+        const goSumPaths = searchForFile('go.sum');
+        // Concatenate both lists and remove duplicates
+        const allPaths = new Set((yield goModPaths).concat(yield goSumPaths));
+        // If provided, set the metadata provided from the action workflow input
+        const metadataInput = core.getInput('metadata');
+        allPaths.forEach((path) => {
+            process.chdir(path);
+            console.log(`Running go mod graph in ${path}`);
+            if (metadataInput.length < 1) {
+                (0, dependency_submission_toolkit_1.run)(parseDependentsFunc, { command: 'go mod graph' }, { detector });
+            }
+            else {
+                const metadata = JSON.parse(metadataInput);
+                (0, dependency_submission_toolkit_1.run)(parseDependentsFunc, { command: 'go mod graph' }, { metadata, detector });
+            }
+        });
+    });
 }
+detect();
 
 
 /***/ }),
 
-/***/ 5604:
+/***/ 1971:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -130,7 +177,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.issue = exports.issueCommand = void 0;
 const os = __importStar(__nccwpck_require__(2037));
-const utils_1 = __nccwpck_require__(1245);
+const utils_1 = __nccwpck_require__(8710);
 /**
  * Commands
  *
@@ -202,7 +249,7 @@ function escapeProperty(s) {
 
 /***/ }),
 
-/***/ 5127:
+/***/ 7538:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -237,12 +284,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getIDToken = exports.getState = exports.saveState = exports.group = exports.endGroup = exports.startGroup = exports.info = exports.notice = exports.warning = exports.error = exports.debug = exports.isDebug = exports.setFailed = exports.setCommandEcho = exports.setOutput = exports.getBooleanInput = exports.getMultilineInput = exports.getInput = exports.addPath = exports.setSecret = exports.exportVariable = exports.ExitCode = void 0;
-const command_1 = __nccwpck_require__(5604);
-const file_command_1 = __nccwpck_require__(7352);
-const utils_1 = __nccwpck_require__(1245);
+const command_1 = __nccwpck_require__(1971);
+const file_command_1 = __nccwpck_require__(9133);
+const utils_1 = __nccwpck_require__(8710);
 const os = __importStar(__nccwpck_require__(2037));
 const path = __importStar(__nccwpck_require__(1017));
-const oidc_utils_1 = __nccwpck_require__(4457);
+const oidc_utils_1 = __nccwpck_require__(3450);
 /**
  * The code to exit an action
  */
@@ -517,11 +564,16 @@ function getIDToken(aud) {
     });
 }
 exports.getIDToken = getIDToken;
+/**
+ * Markdown summary exports
+ */
+var markdown_summary_1 = __nccwpck_require__(5575);
+Object.defineProperty(exports, "markdownSummary", ({ enumerable: true, get: function () { return markdown_summary_1.markdownSummary; } }));
 //# sourceMappingURL=core.js.map
 
 /***/ }),
 
-/***/ 7352:
+/***/ 9133:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -552,7 +604,7 @@ exports.issueCommand = void 0;
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const fs = __importStar(__nccwpck_require__(7147));
 const os = __importStar(__nccwpck_require__(2037));
-const utils_1 = __nccwpck_require__(1245);
+const utils_1 = __nccwpck_require__(8710);
 function issueCommand(command, message) {
     const filePath = process.env[`GITHUB_${command}`];
     if (!filePath) {
@@ -570,7 +622,293 @@ exports.issueCommand = issueCommand;
 
 /***/ }),
 
-/***/ 4457:
+/***/ 5575:
+/***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
+
+"use strict";
+
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.markdownSummary = exports.SUMMARY_DOCS_URL = exports.SUMMARY_ENV_VAR = void 0;
+const os_1 = __nccwpck_require__(2037);
+const fs_1 = __nccwpck_require__(7147);
+const { access, appendFile, writeFile } = fs_1.promises;
+exports.SUMMARY_ENV_VAR = 'GITHUB_STEP_SUMMARY';
+exports.SUMMARY_DOCS_URL = 'https://docs.github.com/actions/using-workflows/workflow-commands-for-github-actions#adding-a-markdown-summary';
+class MarkdownSummary {
+    constructor() {
+        this._buffer = '';
+    }
+    /**
+     * Finds the summary file path from the environment, rejects if env var is not found or file does not exist
+     * Also checks r/w permissions.
+     *
+     * @returns step summary file path
+     */
+    filePath() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (this._filePath) {
+                return this._filePath;
+            }
+            const pathFromEnv = process.env[exports.SUMMARY_ENV_VAR];
+            if (!pathFromEnv) {
+                throw new Error(`Unable to find environment variable for $${exports.SUMMARY_ENV_VAR}. Check if your runtime environment supports markdown summaries.`);
+            }
+            try {
+                yield access(pathFromEnv, fs_1.constants.R_OK | fs_1.constants.W_OK);
+            }
+            catch (_a) {
+                throw new Error(`Unable to access summary file: '${pathFromEnv}'. Check if the file has correct read/write permissions.`);
+            }
+            this._filePath = pathFromEnv;
+            return this._filePath;
+        });
+    }
+    /**
+     * Wraps content in an HTML tag, adding any HTML attributes
+     *
+     * @param {string} tag HTML tag to wrap
+     * @param {string | null} content content within the tag
+     * @param {[attribute: string]: string} attrs key-value list of HTML attributes to add
+     *
+     * @returns {string} content wrapped in HTML element
+     */
+    wrap(tag, content, attrs = {}) {
+        const htmlAttrs = Object.entries(attrs)
+            .map(([key, value]) => ` ${key}="${value}"`)
+            .join('');
+        if (!content) {
+            return `<${tag}${htmlAttrs}>`;
+        }
+        return `<${tag}${htmlAttrs}>${content}</${tag}>`;
+    }
+    /**
+     * Writes text in the buffer to the summary buffer file and empties buffer. Will append by default.
+     *
+     * @param {SummaryWriteOptions} [options] (optional) options for write operation
+     *
+     * @returns {Promise<MarkdownSummary>} markdown summary instance
+     */
+    write(options) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const overwrite = !!(options === null || options === void 0 ? void 0 : options.overwrite);
+            const filePath = yield this.filePath();
+            const writeFunc = overwrite ? writeFile : appendFile;
+            yield writeFunc(filePath, this._buffer, { encoding: 'utf8' });
+            return this.emptyBuffer();
+        });
+    }
+    /**
+     * Clears the summary buffer and wipes the summary file
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    clear() {
+        return __awaiter(this, void 0, void 0, function* () {
+            return this.emptyBuffer().write({ overwrite: true });
+        });
+    }
+    /**
+     * Returns the current summary buffer as a string
+     *
+     * @returns {string} string of summary buffer
+     */
+    stringify() {
+        return this._buffer;
+    }
+    /**
+     * If the summary buffer is empty
+     *
+     * @returns {boolen} true if the buffer is empty
+     */
+    isEmptyBuffer() {
+        return this._buffer.length === 0;
+    }
+    /**
+     * Resets the summary buffer without writing to summary file
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    emptyBuffer() {
+        this._buffer = '';
+        return this;
+    }
+    /**
+     * Adds raw text to the summary buffer
+     *
+     * @param {string} text content to add
+     * @param {boolean} [addEOL=false] (optional) append an EOL to the raw text (default: false)
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    addRaw(text, addEOL = false) {
+        this._buffer += text;
+        return addEOL ? this.addEOL() : this;
+    }
+    /**
+     * Adds the operating system-specific end-of-line marker to the buffer
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    addEOL() {
+        return this.addRaw(os_1.EOL);
+    }
+    /**
+     * Adds an HTML codeblock to the summary buffer
+     *
+     * @param {string} code content to render within fenced code block
+     * @param {string} lang (optional) language to syntax highlight code
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    addCodeBlock(code, lang) {
+        const attrs = Object.assign({}, (lang && { lang }));
+        const element = this.wrap('pre', this.wrap('code', code), attrs);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML list to the summary buffer
+     *
+     * @param {string[]} items list of items to render
+     * @param {boolean} [ordered=false] (optional) if the rendered list should be ordered or not (default: false)
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    addList(items, ordered = false) {
+        const tag = ordered ? 'ol' : 'ul';
+        const listItems = items.map(item => this.wrap('li', item)).join('');
+        const element = this.wrap(tag, listItems);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML table to the summary buffer
+     *
+     * @param {SummaryTableCell[]} rows table rows
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    addTable(rows) {
+        const tableBody = rows
+            .map(row => {
+            const cells = row
+                .map(cell => {
+                if (typeof cell === 'string') {
+                    return this.wrap('td', cell);
+                }
+                const { header, data, colspan, rowspan } = cell;
+                const tag = header ? 'th' : 'td';
+                const attrs = Object.assign(Object.assign({}, (colspan && { colspan })), (rowspan && { rowspan }));
+                return this.wrap(tag, data, attrs);
+            })
+                .join('');
+            return this.wrap('tr', cells);
+        })
+            .join('');
+        const element = this.wrap('table', tableBody);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds a collapsable HTML details element to the summary buffer
+     *
+     * @param {string} label text for the closed state
+     * @param {string} content collapsable content
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    addDetails(label, content) {
+        const element = this.wrap('details', this.wrap('summary', label) + content);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML image tag to the summary buffer
+     *
+     * @param {string} src path to the image you to embed
+     * @param {string} alt text description of the image
+     * @param {SummaryImageOptions} options (optional) addition image attributes
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    addImage(src, alt, options) {
+        const { width, height } = options || {};
+        const attrs = Object.assign(Object.assign({}, (width && { width })), (height && { height }));
+        const element = this.wrap('img', null, Object.assign({ src, alt }, attrs));
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML section heading element
+     *
+     * @param {string} text heading text
+     * @param {number | string} [level=1] (optional) the heading level, default: 1
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    addHeading(text, level) {
+        const tag = `h${level}`;
+        const allowedTag = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'].includes(tag)
+            ? tag
+            : 'h1';
+        const element = this.wrap(allowedTag, text);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML thematic break (<hr>) to the summary buffer
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    addSeparator() {
+        const element = this.wrap('hr', null);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML line break (<br>) to the summary buffer
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    addBreak() {
+        const element = this.wrap('br', null);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML blockquote to the summary buffer
+     *
+     * @param {string} text quote text
+     * @param {string} cite (optional) citation url
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    addQuote(text, cite) {
+        const attrs = Object.assign({}, (cite && { cite }));
+        const element = this.wrap('blockquote', text, attrs);
+        return this.addRaw(element).addEOL();
+    }
+    /**
+     * Adds an HTML anchor tag to the summary buffer
+     *
+     * @param {string} text link text/content
+     * @param {string} href hyperlink
+     *
+     * @returns {MarkdownSummary} markdown summary instance
+     */
+    addLink(text, href) {
+        const element = this.wrap('a', text, { href });
+        return this.addRaw(element).addEOL();
+    }
+}
+// singleton export
+exports.markdownSummary = new MarkdownSummary();
+//# sourceMappingURL=markdown-summary.js.map
+
+/***/ }),
+
+/***/ 3450:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -586,9 +924,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.OidcClient = void 0;
-const http_client_1 = __nccwpck_require__(1840);
-const auth_1 = __nccwpck_require__(9421);
-const core_1 = __nccwpck_require__(5127);
+const http_client_1 = __nccwpck_require__(1690);
+const auth_1 = __nccwpck_require__(8429);
+const core_1 = __nccwpck_require__(7538);
 class OidcClient {
     static createHttpClient(allowRetry = true, maxRetry = 10) {
         const requestOptions = {
@@ -654,7 +992,7 @@ exports.OidcClient = OidcClient;
 
 /***/ }),
 
-/***/ 1245:
+/***/ 8710:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -701,7 +1039,7 @@ exports.toCommandProperties = toCommandProperties;
 
 /***/ }),
 
-/***/ 2049:
+/***/ 6413:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -737,7 +1075,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getExecOutput = exports.exec = void 0;
 const string_decoder_1 = __nccwpck_require__(1576);
-const tr = __importStar(__nccwpck_require__(1469));
+const tr = __importStar(__nccwpck_require__(7114));
 /**
  * Exec a command.
  * Output will be streamed to the live console.
@@ -811,7 +1149,7 @@ exports.getExecOutput = getExecOutput;
 
 /***/ }),
 
-/***/ 1469:
+/***/ 7114:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -850,8 +1188,8 @@ const os = __importStar(__nccwpck_require__(2037));
 const events = __importStar(__nccwpck_require__(2361));
 const child = __importStar(__nccwpck_require__(2081));
 const path = __importStar(__nccwpck_require__(1017));
-const io = __importStar(__nccwpck_require__(2864));
-const ioUtil = __importStar(__nccwpck_require__(1887));
+const io = __importStar(__nccwpck_require__(1354));
+const ioUtil = __importStar(__nccwpck_require__(1029));
 const timers_1 = __nccwpck_require__(9512);
 /* eslint-disable @typescript-eslint/unbound-method */
 const IS_WINDOWS = process.platform === 'win32';
@@ -1436,7 +1774,7 @@ class ExecState extends events.EventEmitter {
 
 /***/ }),
 
-/***/ 5210:
+/***/ 8011:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -1497,7 +1835,7 @@ exports.Context = Context;
 
 /***/ }),
 
-/***/ 3134:
+/***/ 5507:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1523,8 +1861,8 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokit = exports.context = void 0;
-const Context = __importStar(__nccwpck_require__(5210));
-const utils_1 = __nccwpck_require__(5310);
+const Context = __importStar(__nccwpck_require__(8011));
+const utils_1 = __nccwpck_require__(2842);
 exports.context = new Context.Context();
 /**
  * Returns a hydrated octokit ready to use for GitHub Actions
@@ -1540,7 +1878,7 @@ exports.getOctokit = getOctokit;
 
 /***/ }),
 
-/***/ 7329:
+/***/ 8286:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1566,7 +1904,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getApiBaseUrl = exports.getProxyAgent = exports.getAuthString = void 0;
-const httpClient = __importStar(__nccwpck_require__(1840));
+const httpClient = __importStar(__nccwpck_require__(1690));
 function getAuthString(token, options) {
     if (!token && !options.auth) {
         throw new Error('Parameter token or opts.auth is required');
@@ -1590,7 +1928,7 @@ exports.getApiBaseUrl = getApiBaseUrl;
 
 /***/ }),
 
-/***/ 5310:
+/***/ 2842:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -1616,12 +1954,12 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getOctokitOptions = exports.GitHub = exports.context = void 0;
-const Context = __importStar(__nccwpck_require__(5210));
-const Utils = __importStar(__nccwpck_require__(7329));
+const Context = __importStar(__nccwpck_require__(8011));
+const Utils = __importStar(__nccwpck_require__(8286));
 // octokit + plugins
-const core_1 = __nccwpck_require__(6461);
-const plugin_rest_endpoint_methods_1 = __nccwpck_require__(6752);
-const plugin_paginate_rest_1 = __nccwpck_require__(9883);
+const core_1 = __nccwpck_require__(4943);
+const plugin_rest_endpoint_methods_1 = __nccwpck_require__(2856);
+const plugin_paginate_rest_1 = __nccwpck_require__(3235);
 exports.context = new Context.Context();
 const baseUrl = Utils.getApiBaseUrl();
 const defaults = {
@@ -1651,7 +1989,7 @@ exports.getOctokitOptions = getOctokitOptions;
 
 /***/ }),
 
-/***/ 9421:
+/***/ 8429:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -1717,7 +2055,7 @@ exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHand
 
 /***/ }),
 
-/***/ 1840:
+/***/ 1690:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -1725,7 +2063,7 @@ exports.PersonalAccessTokenCredentialHandler = PersonalAccessTokenCredentialHand
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const http = __nccwpck_require__(3685);
 const https = __nccwpck_require__(5687);
-const pm = __nccwpck_require__(8045);
+const pm = __nccwpck_require__(524);
 let tunnel;
 var HttpCodes;
 (function (HttpCodes) {
@@ -2144,7 +2482,7 @@ class HttpClient {
         if (useProxy) {
             // If using proxy, need tunnel
             if (!tunnel) {
-                tunnel = __nccwpck_require__(7265);
+                tunnel = __nccwpck_require__(6610);
             }
             const agentOptions = {
                 maxSockets: maxSockets,
@@ -2262,7 +2600,7 @@ exports.HttpClient = HttpClient;
 
 /***/ }),
 
-/***/ 8045:
+/***/ 524:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -2327,7 +2665,7 @@ exports.checkBypass = checkBypass;
 
 /***/ }),
 
-/***/ 1887:
+/***/ 1029:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -2511,7 +2849,7 @@ exports.getCmdPath = getCmdPath;
 
 /***/ }),
 
-/***/ 2864:
+/***/ 1354:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -2550,7 +2888,7 @@ const assert_1 = __nccwpck_require__(9491);
 const childProcess = __importStar(__nccwpck_require__(2081));
 const path = __importStar(__nccwpck_require__(1017));
 const util_1 = __nccwpck_require__(3837);
-const ioUtil = __importStar(__nccwpck_require__(1887));
+const ioUtil = __importStar(__nccwpck_require__(1029));
 const exec = util_1.promisify(childProcess.exec);
 const execFile = util_1.promisify(childProcess.execFile);
 /**
@@ -2859,7 +3197,7 @@ function copyFile(srcFile, destFile, force) {
 
 /***/ }),
 
-/***/ 8049:
+/***/ 2128:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -2898,10 +3236,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.run = void 0;
-const core = __importStar(__nccwpck_require__(5127));
-const github = __importStar(__nccwpck_require__(3134));
-const processor_1 = __nccwpck_require__(9642);
-const snapshot_1 = __nccwpck_require__(5553);
+const core = __importStar(__nccwpck_require__(7538));
+const github = __importStar(__nccwpck_require__(5507));
+const processor_1 = __nccwpck_require__(6084);
+const snapshot_1 = __nccwpck_require__(5382);
 function run(parseDependentsFunction, manifestInfo = {}, options = {}) {
     return __awaiter(this, void 0, void 0, function* () {
         const manifestLocation = manifestInfo.path || manifestInfo.command;
@@ -2939,7 +3277,7 @@ exports.run = run;
 
 /***/ }),
 
-/***/ 9642:
+/***/ 6084:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -2982,9 +3320,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.readDependencies = exports.Entry = void 0;
-const core = __importStar(__nccwpck_require__(5127));
-const exec = __importStar(__nccwpck_require__(2049));
-const github = __importStar(__nccwpck_require__(3134));
+const core = __importStar(__nccwpck_require__(7538));
+const exec = __importStar(__nccwpck_require__(6413));
+const github = __importStar(__nccwpck_require__(5507));
 class Entry {
     constructor(package_url, relationship, scope, dependencies) {
         const parsedEntryText = this.parseData(package_url);
@@ -3076,7 +3414,7 @@ exports.readDependencies = readDependencies;
 
 /***/ }),
 
-/***/ 5553:
+/***/ 5382:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
 "use strict";
@@ -3127,9 +3465,9 @@ var __classPrivateFieldGet = (this && this.__classPrivateFieldGet) || function (
 var _Dependency_name;
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.Snapshot = exports.Manifest = exports.metadataValidSize = exports.MaxMetaDataKeys = exports.Dependency = void 0;
-const core = __importStar(__nccwpck_require__(5127));
-const github = __importStar(__nccwpck_require__(3134));
-const rest_1 = __nccwpck_require__(1563);
+const core = __importStar(__nccwpck_require__(7538));
+const github = __importStar(__nccwpck_require__(5507));
+const rest_1 = __nccwpck_require__(2427);
 /*
 Core functionality for creating a snapshot of a project's dependencies.
 */
@@ -3312,7 +3650,7 @@ exports.Snapshot = Snapshot;
 
 /***/ }),
 
-/***/ 8426:
+/***/ 2083:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -3375,7 +3713,7 @@ exports.createTokenAuth = createTokenAuth;
 
 /***/ }),
 
-/***/ 6461:
+/***/ 4943:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -3383,11 +3721,11 @@ exports.createTokenAuth = createTokenAuth;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var universalUserAgent = __nccwpck_require__(7081);
-var beforeAfterHook = __nccwpck_require__(3108);
-var request = __nccwpck_require__(3986);
-var graphql = __nccwpck_require__(1463);
-var authToken = __nccwpck_require__(8426);
+var universalUserAgent = __nccwpck_require__(3170);
+var beforeAfterHook = __nccwpck_require__(1022);
+var request = __nccwpck_require__(9138);
+var graphql = __nccwpck_require__(5163);
+var authToken = __nccwpck_require__(2083);
 
 function _objectWithoutPropertiesLoose(source, excluded) {
   if (source == null) return {};
@@ -3559,7 +3897,7 @@ exports.Octokit = Octokit;
 
 /***/ }),
 
-/***/ 2995:
+/***/ 1949:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -3567,8 +3905,8 @@ exports.Octokit = Octokit;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var isPlainObject = __nccwpck_require__(3032);
-var universalUserAgent = __nccwpck_require__(7081);
+var isPlainObject = __nccwpck_require__(8264);
+var universalUserAgent = __nccwpck_require__(3170);
 
 function lowercaseKeys(object) {
   if (!object) {
@@ -3957,7 +4295,7 @@ exports.endpoint = endpoint;
 
 /***/ }),
 
-/***/ 1463:
+/***/ 5163:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -3965,8 +4303,8 @@ exports.endpoint = endpoint;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var request = __nccwpck_require__(3986);
-var universalUserAgent = __nccwpck_require__(7081);
+var request = __nccwpck_require__(9138);
+var universalUserAgent = __nccwpck_require__(3170);
 
 const VERSION = "4.8.0";
 
@@ -4083,7 +4421,7 @@ exports.withCustomRequest = withCustomRequest;
 
 /***/ }),
 
-/***/ 9883:
+/***/ 3235:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -4308,7 +4646,7 @@ exports.paginatingEndpoints = paginatingEndpoints;
 
 /***/ }),
 
-/***/ 7823:
+/***/ 2332:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -4346,7 +4684,7 @@ exports.requestLog = requestLog;
 
 /***/ }),
 
-/***/ 6752:
+/***/ 2856:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -5379,7 +5717,7 @@ exports.restEndpointMethods = restEndpointMethods;
 
 /***/ }),
 
-/***/ 3190:
+/***/ 5135:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -5389,8 +5727,8 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var deprecation = __nccwpck_require__(5800);
-var once = _interopDefault(__nccwpck_require__(8666));
+var deprecation = __nccwpck_require__(4568);
+var once = _interopDefault(__nccwpck_require__(3534));
 
 const logOnceCode = once(deprecation => console.warn(deprecation));
 const logOnceHeaders = once(deprecation => console.warn(deprecation));
@@ -5461,7 +5799,7 @@ exports.RequestError = RequestError;
 
 /***/ }),
 
-/***/ 3986:
+/***/ 9138:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -5471,11 +5809,11 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 
 function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
 
-var endpoint = __nccwpck_require__(2995);
-var universalUserAgent = __nccwpck_require__(7081);
-var isPlainObject = __nccwpck_require__(3032);
-var nodeFetch = _interopDefault(__nccwpck_require__(8534));
-var requestError = __nccwpck_require__(3190);
+var endpoint = __nccwpck_require__(1949);
+var universalUserAgent = __nccwpck_require__(3170);
+var isPlainObject = __nccwpck_require__(8264);
+var nodeFetch = _interopDefault(__nccwpck_require__(7505));
+var requestError = __nccwpck_require__(5135);
 
 const VERSION = "5.6.3";
 
@@ -5646,7 +5984,7 @@ exports.request = request;
 
 /***/ }),
 
-/***/ 1563:
+/***/ 2427:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -5654,10 +5992,10 @@ exports.request = request;
 
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 
-var core = __nccwpck_require__(6461);
-var pluginRequestLog = __nccwpck_require__(7823);
-var pluginPaginateRest = __nccwpck_require__(9883);
-var pluginRestEndpointMethods = __nccwpck_require__(6752);
+var core = __nccwpck_require__(4943);
+var pluginRequestLog = __nccwpck_require__(2332);
+var pluginPaginateRest = __nccwpck_require__(3235);
+var pluginRestEndpointMethods = __nccwpck_require__(2856);
 
 const VERSION = "18.12.0";
 
@@ -5671,12 +6009,12 @@ exports.Octokit = Octokit;
 
 /***/ }),
 
-/***/ 3108:
+/***/ 1022:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var register = __nccwpck_require__(9676)
-var addHook = __nccwpck_require__(3862)
-var removeHook = __nccwpck_require__(7704)
+var register = __nccwpck_require__(5121)
+var addHook = __nccwpck_require__(6352)
+var removeHook = __nccwpck_require__(5410)
 
 // bind with array of arguments: https://stackoverflow.com/a/21792913
 var bind = Function.bind
@@ -5735,7 +6073,7 @@ module.exports.Collection = Hook.Collection
 
 /***/ }),
 
-/***/ 3862:
+/***/ 6352:
 /***/ ((module) => {
 
 module.exports = addHook;
@@ -5788,7 +6126,7 @@ function addHook(state, kind, name, hook) {
 
 /***/ }),
 
-/***/ 9676:
+/***/ 5121:
 /***/ ((module) => {
 
 module.exports = register;
@@ -5822,7 +6160,7 @@ function register(state, name, method, options) {
 
 /***/ }),
 
-/***/ 7704:
+/***/ 5410:
 /***/ ((module) => {
 
 module.exports = removeHook;
@@ -5848,7 +6186,364 @@ function removeHook(state, name, method) {
 
 /***/ }),
 
-/***/ 5800:
+/***/ 4439:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+const cp = __nccwpck_require__(2081);
+const parse = __nccwpck_require__(8961);
+const enoent = __nccwpck_require__(912);
+
+function spawn(command, args, options) {
+    // Parse the arguments
+    const parsed = parse(command, args, options);
+
+    // Spawn the child process
+    const spawned = cp.spawn(parsed.command, parsed.args, parsed.options);
+
+    // Hook into child process "exit" event to emit an error if the command
+    // does not exists, see: https://github.com/IndigoUnited/node-cross-spawn/issues/16
+    enoent.hookChildProcess(spawned, parsed);
+
+    return spawned;
+}
+
+function spawnSync(command, args, options) {
+    // Parse the arguments
+    const parsed = parse(command, args, options);
+
+    // Spawn the child process
+    const result = cp.spawnSync(parsed.command, parsed.args, parsed.options);
+
+    // Analyze if the command does not exist, see: https://github.com/IndigoUnited/node-cross-spawn/issues/16
+    result.error = result.error || enoent.verifyENOENTSync(result.status, parsed);
+
+    return result;
+}
+
+module.exports = spawn;
+module.exports.spawn = spawn;
+module.exports.sync = spawnSync;
+
+module.exports._parse = parse;
+module.exports._enoent = enoent;
+
+
+/***/ }),
+
+/***/ 912:
+/***/ ((module) => {
+
+"use strict";
+
+
+const isWin = process.platform === 'win32';
+
+function notFoundError(original, syscall) {
+    return Object.assign(new Error(`${syscall} ${original.command} ENOENT`), {
+        code: 'ENOENT',
+        errno: 'ENOENT',
+        syscall: `${syscall} ${original.command}`,
+        path: original.command,
+        spawnargs: original.args,
+    });
+}
+
+function hookChildProcess(cp, parsed) {
+    if (!isWin) {
+        return;
+    }
+
+    const originalEmit = cp.emit;
+
+    cp.emit = function (name, arg1) {
+        // If emitting "exit" event and exit code is 1, we need to check if
+        // the command exists and emit an "error" instead
+        // See https://github.com/IndigoUnited/node-cross-spawn/issues/16
+        if (name === 'exit') {
+            const err = verifyENOENT(arg1, parsed, 'spawn');
+
+            if (err) {
+                return originalEmit.call(cp, 'error', err);
+            }
+        }
+
+        return originalEmit.apply(cp, arguments); // eslint-disable-line prefer-rest-params
+    };
+}
+
+function verifyENOENT(status, parsed) {
+    if (isWin && status === 1 && !parsed.file) {
+        return notFoundError(parsed.original, 'spawn');
+    }
+
+    return null;
+}
+
+function verifyENOENTSync(status, parsed) {
+    if (isWin && status === 1 && !parsed.file) {
+        return notFoundError(parsed.original, 'spawnSync');
+    }
+
+    return null;
+}
+
+module.exports = {
+    hookChildProcess,
+    verifyENOENT,
+    verifyENOENTSync,
+    notFoundError,
+};
+
+
+/***/ }),
+
+/***/ 8961:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+const path = __nccwpck_require__(1017);
+const resolveCommand = __nccwpck_require__(2460);
+const escape = __nccwpck_require__(1528);
+const readShebang = __nccwpck_require__(1008);
+
+const isWin = process.platform === 'win32';
+const isExecutableRegExp = /\.(?:com|exe)$/i;
+const isCmdShimRegExp = /node_modules[\\/].bin[\\/][^\\/]+\.cmd$/i;
+
+function detectShebang(parsed) {
+    parsed.file = resolveCommand(parsed);
+
+    const shebang = parsed.file && readShebang(parsed.file);
+
+    if (shebang) {
+        parsed.args.unshift(parsed.file);
+        parsed.command = shebang;
+
+        return resolveCommand(parsed);
+    }
+
+    return parsed.file;
+}
+
+function parseNonShell(parsed) {
+    if (!isWin) {
+        return parsed;
+    }
+
+    // Detect & add support for shebangs
+    const commandFile = detectShebang(parsed);
+
+    // We don't need a shell if the command filename is an executable
+    const needsShell = !isExecutableRegExp.test(commandFile);
+
+    // If a shell is required, use cmd.exe and take care of escaping everything correctly
+    // Note that `forceShell` is an hidden option used only in tests
+    if (parsed.options.forceShell || needsShell) {
+        // Need to double escape meta chars if the command is a cmd-shim located in `node_modules/.bin/`
+        // The cmd-shim simply calls execute the package bin file with NodeJS, proxying any argument
+        // Because the escape of metachars with ^ gets interpreted when the cmd.exe is first called,
+        // we need to double escape them
+        const needsDoubleEscapeMetaChars = isCmdShimRegExp.test(commandFile);
+
+        // Normalize posix paths into OS compatible paths (e.g.: foo/bar -> foo\bar)
+        // This is necessary otherwise it will always fail with ENOENT in those cases
+        parsed.command = path.normalize(parsed.command);
+
+        // Escape command & arguments
+        parsed.command = escape.command(parsed.command);
+        parsed.args = parsed.args.map((arg) => escape.argument(arg, needsDoubleEscapeMetaChars));
+
+        const shellCommand = [parsed.command].concat(parsed.args).join(' ');
+
+        parsed.args = ['/d', '/s', '/c', `"${shellCommand}"`];
+        parsed.command = process.env.comspec || 'cmd.exe';
+        parsed.options.windowsVerbatimArguments = true; // Tell node's spawn that the arguments are already escaped
+    }
+
+    return parsed;
+}
+
+function parse(command, args, options) {
+    // Normalize arguments, similar to nodejs
+    if (args && !Array.isArray(args)) {
+        options = args;
+        args = null;
+    }
+
+    args = args ? args.slice(0) : []; // Clone array to avoid changing the original
+    options = Object.assign({}, options); // Clone object to avoid changing the original
+
+    // Build our parsed object
+    const parsed = {
+        command,
+        args,
+        options,
+        file: undefined,
+        original: {
+            command,
+            args,
+        },
+    };
+
+    // Delegate further parsing to shell or non-shell
+    return options.shell ? parsed : parseNonShell(parsed);
+}
+
+module.exports = parse;
+
+
+/***/ }),
+
+/***/ 1528:
+/***/ ((module) => {
+
+"use strict";
+
+
+// See http://www.robvanderwoude.com/escapechars.php
+const metaCharsRegExp = /([()\][%!^"`<>&|;, *?])/g;
+
+function escapeCommand(arg) {
+    // Escape meta chars
+    arg = arg.replace(metaCharsRegExp, '^$1');
+
+    return arg;
+}
+
+function escapeArgument(arg, doubleEscapeMetaChars) {
+    // Convert to string
+    arg = `${arg}`;
+
+    // Algorithm below is based on https://qntm.org/cmd
+
+    // Sequence of backslashes followed by a double quote:
+    // double up all the backslashes and escape the double quote
+    arg = arg.replace(/(\\*)"/g, '$1$1\\"');
+
+    // Sequence of backslashes followed by the end of the string
+    // (which will become a double quote later):
+    // double up all the backslashes
+    arg = arg.replace(/(\\*)$/, '$1$1');
+
+    // All other backslashes occur literally
+
+    // Quote the whole thing:
+    arg = `"${arg}"`;
+
+    // Escape meta chars
+    arg = arg.replace(metaCharsRegExp, '^$1');
+
+    // Double escape meta chars if necessary
+    if (doubleEscapeMetaChars) {
+        arg = arg.replace(metaCharsRegExp, '^$1');
+    }
+
+    return arg;
+}
+
+module.exports.command = escapeCommand;
+module.exports.argument = escapeArgument;
+
+
+/***/ }),
+
+/***/ 1008:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+const fs = __nccwpck_require__(7147);
+const shebangCommand = __nccwpck_require__(9238);
+
+function readShebang(command) {
+    // Read the first 150 bytes from the file
+    const size = 150;
+    const buffer = Buffer.alloc(size);
+
+    let fd;
+
+    try {
+        fd = fs.openSync(command, 'r');
+        fs.readSync(fd, buffer, 0, size, 0);
+        fs.closeSync(fd);
+    } catch (e) { /* Empty */ }
+
+    // Attempt to extract shebang (null is returned if not a shebang)
+    return shebangCommand(buffer.toString());
+}
+
+module.exports = readShebang;
+
+
+/***/ }),
+
+/***/ 2460:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+const path = __nccwpck_require__(1017);
+const which = __nccwpck_require__(2355);
+const getPathKey = __nccwpck_require__(5397);
+
+function resolveCommandAttempt(parsed, withoutPathExt) {
+    const env = parsed.options.env || process.env;
+    const cwd = process.cwd();
+    const hasCustomCwd = parsed.options.cwd != null;
+    // Worker threads do not have process.chdir()
+    const shouldSwitchCwd = hasCustomCwd && process.chdir !== undefined && !process.chdir.disabled;
+
+    // If a custom `cwd` was specified, we need to change the process cwd
+    // because `which` will do stat calls but does not support a custom cwd
+    if (shouldSwitchCwd) {
+        try {
+            process.chdir(parsed.options.cwd);
+        } catch (err) {
+            /* Empty */
+        }
+    }
+
+    let resolved;
+
+    try {
+        resolved = which.sync(parsed.command, {
+            path: env[getPathKey({ env })],
+            pathExt: withoutPathExt ? path.delimiter : undefined,
+        });
+    } catch (e) {
+        /* Empty */
+    } finally {
+        if (shouldSwitchCwd) {
+            process.chdir(cwd);
+        }
+    }
+
+    // If we successfully resolved, ensure that an absolute path is returned
+    // Note that when a custom `cwd` was used, we need to resolve to an absolute path based on it
+    if (resolved) {
+        resolved = path.resolve(hasCustomCwd ? parsed.options.cwd : '', resolved);
+    }
+
+    return resolved;
+}
+
+function resolveCommand(parsed) {
+    return resolveCommandAttempt(parsed) || resolveCommandAttempt(parsed, true);
+}
+
+module.exports = resolveCommand;
+
+
+/***/ }),
+
+/***/ 4568:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -5876,7 +6571,1336 @@ exports.Deprecation = Deprecation;
 
 /***/ }),
 
-/***/ 3032:
+/***/ 9531:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const path = __nccwpck_require__(1017);
+const childProcess = __nccwpck_require__(2081);
+const crossSpawn = __nccwpck_require__(4439);
+const stripFinalNewline = __nccwpck_require__(182);
+const npmRunPath = __nccwpck_require__(6463);
+const onetime = __nccwpck_require__(2494);
+const makeError = __nccwpck_require__(8828);
+const normalizeStdio = __nccwpck_require__(3346);
+const {spawnedKill, spawnedCancel, setupTimeout, validateTimeout, setExitHandler} = __nccwpck_require__(7674);
+const {handleInput, getSpawnedResult, makeAllStream, validateInputSync} = __nccwpck_require__(3351);
+const {mergePromise, getSpawnedPromise} = __nccwpck_require__(4881);
+const {joinCommand, parseCommand, getEscapedCommand} = __nccwpck_require__(3477);
+
+const DEFAULT_MAX_BUFFER = 1000 * 1000 * 100;
+
+const getEnv = ({env: envOption, extendEnv, preferLocal, localDir, execPath}) => {
+	const env = extendEnv ? {...process.env, ...envOption} : envOption;
+
+	if (preferLocal) {
+		return npmRunPath.env({env, cwd: localDir, execPath});
+	}
+
+	return env;
+};
+
+const handleArguments = (file, args, options = {}) => {
+	const parsed = crossSpawn._parse(file, args, options);
+	file = parsed.command;
+	args = parsed.args;
+	options = parsed.options;
+
+	options = {
+		maxBuffer: DEFAULT_MAX_BUFFER,
+		buffer: true,
+		stripFinalNewline: true,
+		extendEnv: true,
+		preferLocal: false,
+		localDir: options.cwd || process.cwd(),
+		execPath: process.execPath,
+		encoding: 'utf8',
+		reject: true,
+		cleanup: true,
+		all: false,
+		windowsHide: true,
+		...options
+	};
+
+	options.env = getEnv(options);
+
+	options.stdio = normalizeStdio(options);
+
+	if (process.platform === 'win32' && path.basename(file, '.exe') === 'cmd') {
+		// #116
+		args.unshift('/q');
+	}
+
+	return {file, args, options, parsed};
+};
+
+const handleOutput = (options, value, error) => {
+	if (typeof value !== 'string' && !Buffer.isBuffer(value)) {
+		// When `execa.sync()` errors, we normalize it to '' to mimic `execa()`
+		return error === undefined ? undefined : '';
+	}
+
+	if (options.stripFinalNewline) {
+		return stripFinalNewline(value);
+	}
+
+	return value;
+};
+
+const execa = (file, args, options) => {
+	const parsed = handleArguments(file, args, options);
+	const command = joinCommand(file, args);
+	const escapedCommand = getEscapedCommand(file, args);
+
+	validateTimeout(parsed.options);
+
+	let spawned;
+	try {
+		spawned = childProcess.spawn(parsed.file, parsed.args, parsed.options);
+	} catch (error) {
+		// Ensure the returned error is always both a promise and a child process
+		const dummySpawned = new childProcess.ChildProcess();
+		const errorPromise = Promise.reject(makeError({
+			error,
+			stdout: '',
+			stderr: '',
+			all: '',
+			command,
+			escapedCommand,
+			parsed,
+			timedOut: false,
+			isCanceled: false,
+			killed: false
+		}));
+		return mergePromise(dummySpawned, errorPromise);
+	}
+
+	const spawnedPromise = getSpawnedPromise(spawned);
+	const timedPromise = setupTimeout(spawned, parsed.options, spawnedPromise);
+	const processDone = setExitHandler(spawned, parsed.options, timedPromise);
+
+	const context = {isCanceled: false};
+
+	spawned.kill = spawnedKill.bind(null, spawned.kill.bind(spawned));
+	spawned.cancel = spawnedCancel.bind(null, spawned, context);
+
+	const handlePromise = async () => {
+		const [{error, exitCode, signal, timedOut}, stdoutResult, stderrResult, allResult] = await getSpawnedResult(spawned, parsed.options, processDone);
+		const stdout = handleOutput(parsed.options, stdoutResult);
+		const stderr = handleOutput(parsed.options, stderrResult);
+		const all = handleOutput(parsed.options, allResult);
+
+		if (error || exitCode !== 0 || signal !== null) {
+			const returnedError = makeError({
+				error,
+				exitCode,
+				signal,
+				stdout,
+				stderr,
+				all,
+				command,
+				escapedCommand,
+				parsed,
+				timedOut,
+				isCanceled: context.isCanceled,
+				killed: spawned.killed
+			});
+
+			if (!parsed.options.reject) {
+				return returnedError;
+			}
+
+			throw returnedError;
+		}
+
+		return {
+			command,
+			escapedCommand,
+			exitCode: 0,
+			stdout,
+			stderr,
+			all,
+			failed: false,
+			timedOut: false,
+			isCanceled: false,
+			killed: false
+		};
+	};
+
+	const handlePromiseOnce = onetime(handlePromise);
+
+	handleInput(spawned, parsed.options.input);
+
+	spawned.all = makeAllStream(spawned, parsed.options);
+
+	return mergePromise(spawned, handlePromiseOnce);
+};
+
+module.exports = execa;
+
+module.exports.sync = (file, args, options) => {
+	const parsed = handleArguments(file, args, options);
+	const command = joinCommand(file, args);
+	const escapedCommand = getEscapedCommand(file, args);
+
+	validateInputSync(parsed.options);
+
+	let result;
+	try {
+		result = childProcess.spawnSync(parsed.file, parsed.args, parsed.options);
+	} catch (error) {
+		throw makeError({
+			error,
+			stdout: '',
+			stderr: '',
+			all: '',
+			command,
+			escapedCommand,
+			parsed,
+			timedOut: false,
+			isCanceled: false,
+			killed: false
+		});
+	}
+
+	const stdout = handleOutput(parsed.options, result.stdout, result.error);
+	const stderr = handleOutput(parsed.options, result.stderr, result.error);
+
+	if (result.error || result.status !== 0 || result.signal !== null) {
+		const error = makeError({
+			stdout,
+			stderr,
+			error: result.error,
+			signal: result.signal,
+			exitCode: result.status,
+			command,
+			escapedCommand,
+			parsed,
+			timedOut: result.error && result.error.code === 'ETIMEDOUT',
+			isCanceled: false,
+			killed: result.signal !== null
+		});
+
+		if (!parsed.options.reject) {
+			return error;
+		}
+
+		throw error;
+	}
+
+	return {
+		command,
+		escapedCommand,
+		exitCode: 0,
+		stdout,
+		stderr,
+		failed: false,
+		timedOut: false,
+		isCanceled: false,
+		killed: false
+	};
+};
+
+module.exports.command = (command, options) => {
+	const [file, ...args] = parseCommand(command);
+	return execa(file, args, options);
+};
+
+module.exports.commandSync = (command, options) => {
+	const [file, ...args] = parseCommand(command);
+	return execa.sync(file, args, options);
+};
+
+module.exports.node = (scriptPath, args, options = {}) => {
+	if (args && !Array.isArray(args) && typeof args === 'object') {
+		options = args;
+		args = [];
+	}
+
+	const stdio = normalizeStdio.node(options);
+	const defaultExecArgv = process.execArgv.filter(arg => !arg.startsWith('--inspect'));
+
+	const {
+		nodePath = process.execPath,
+		nodeOptions = defaultExecArgv
+	} = options;
+
+	return execa(
+		nodePath,
+		[
+			...nodeOptions,
+			scriptPath,
+			...(Array.isArray(args) ? args : [])
+		],
+		{
+			...options,
+			stdin: undefined,
+			stdout: undefined,
+			stderr: undefined,
+			stdio,
+			shell: false
+		}
+	);
+};
+
+
+/***/ }),
+
+/***/ 3477:
+/***/ ((module) => {
+
+"use strict";
+
+const normalizeArgs = (file, args = []) => {
+	if (!Array.isArray(args)) {
+		return [file];
+	}
+
+	return [file, ...args];
+};
+
+const NO_ESCAPE_REGEXP = /^[\w.-]+$/;
+const DOUBLE_QUOTES_REGEXP = /"/g;
+
+const escapeArg = arg => {
+	if (typeof arg !== 'string' || NO_ESCAPE_REGEXP.test(arg)) {
+		return arg;
+	}
+
+	return `"${arg.replace(DOUBLE_QUOTES_REGEXP, '\\"')}"`;
+};
+
+const joinCommand = (file, args) => {
+	return normalizeArgs(file, args).join(' ');
+};
+
+const getEscapedCommand = (file, args) => {
+	return normalizeArgs(file, args).map(arg => escapeArg(arg)).join(' ');
+};
+
+const SPACES_REGEXP = / +/g;
+
+// Handle `execa.command()`
+const parseCommand = command => {
+	const tokens = [];
+	for (const token of command.trim().split(SPACES_REGEXP)) {
+		// Allow spaces to be escaped by a backslash if not meant as a delimiter
+		const previousToken = tokens[tokens.length - 1];
+		if (previousToken && previousToken.endsWith('\\')) {
+			// Merge previous token with current one
+			tokens[tokens.length - 1] = `${previousToken.slice(0, -1)} ${token}`;
+		} else {
+			tokens.push(token);
+		}
+	}
+
+	return tokens;
+};
+
+module.exports = {
+	joinCommand,
+	getEscapedCommand,
+	parseCommand
+};
+
+
+/***/ }),
+
+/***/ 8828:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const {signalsByName} = __nccwpck_require__(2912);
+
+const getErrorPrefix = ({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled}) => {
+	if (timedOut) {
+		return `timed out after ${timeout} milliseconds`;
+	}
+
+	if (isCanceled) {
+		return 'was canceled';
+	}
+
+	if (errorCode !== undefined) {
+		return `failed with ${errorCode}`;
+	}
+
+	if (signal !== undefined) {
+		return `was killed with ${signal} (${signalDescription})`;
+	}
+
+	if (exitCode !== undefined) {
+		return `failed with exit code ${exitCode}`;
+	}
+
+	return 'failed';
+};
+
+const makeError = ({
+	stdout,
+	stderr,
+	all,
+	error,
+	signal,
+	exitCode,
+	command,
+	escapedCommand,
+	timedOut,
+	isCanceled,
+	killed,
+	parsed: {options: {timeout}}
+}) => {
+	// `signal` and `exitCode` emitted on `spawned.on('exit')` event can be `null`.
+	// We normalize them to `undefined`
+	exitCode = exitCode === null ? undefined : exitCode;
+	signal = signal === null ? undefined : signal;
+	const signalDescription = signal === undefined ? undefined : signalsByName[signal].description;
+
+	const errorCode = error && error.code;
+
+	const prefix = getErrorPrefix({timedOut, timeout, errorCode, signal, signalDescription, exitCode, isCanceled});
+	const execaMessage = `Command ${prefix}: ${command}`;
+	const isError = Object.prototype.toString.call(error) === '[object Error]';
+	const shortMessage = isError ? `${execaMessage}\n${error.message}` : execaMessage;
+	const message = [shortMessage, stderr, stdout].filter(Boolean).join('\n');
+
+	if (isError) {
+		error.originalMessage = error.message;
+		error.message = message;
+	} else {
+		error = new Error(message);
+	}
+
+	error.shortMessage = shortMessage;
+	error.command = command;
+	error.escapedCommand = escapedCommand;
+	error.exitCode = exitCode;
+	error.signal = signal;
+	error.signalDescription = signalDescription;
+	error.stdout = stdout;
+	error.stderr = stderr;
+
+	if (all !== undefined) {
+		error.all = all;
+	}
+
+	if ('bufferedData' in error) {
+		delete error.bufferedData;
+	}
+
+	error.failed = true;
+	error.timedOut = Boolean(timedOut);
+	error.isCanceled = isCanceled;
+	error.killed = killed && !timedOut;
+
+	return error;
+};
+
+module.exports = makeError;
+
+
+/***/ }),
+
+/***/ 7674:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const os = __nccwpck_require__(2037);
+const onExit = __nccwpck_require__(2872);
+
+const DEFAULT_FORCE_KILL_TIMEOUT = 1000 * 5;
+
+// Monkey-patches `childProcess.kill()` to add `forceKillAfterTimeout` behavior
+const spawnedKill = (kill, signal = 'SIGTERM', options = {}) => {
+	const killResult = kill(signal);
+	setKillTimeout(kill, signal, options, killResult);
+	return killResult;
+};
+
+const setKillTimeout = (kill, signal, options, killResult) => {
+	if (!shouldForceKill(signal, options, killResult)) {
+		return;
+	}
+
+	const timeout = getForceKillAfterTimeout(options);
+	const t = setTimeout(() => {
+		kill('SIGKILL');
+	}, timeout);
+
+	// Guarded because there's no `.unref()` when `execa` is used in the renderer
+	// process in Electron. This cannot be tested since we don't run tests in
+	// Electron.
+	// istanbul ignore else
+	if (t.unref) {
+		t.unref();
+	}
+};
+
+const shouldForceKill = (signal, {forceKillAfterTimeout}, killResult) => {
+	return isSigterm(signal) && forceKillAfterTimeout !== false && killResult;
+};
+
+const isSigterm = signal => {
+	return signal === os.constants.signals.SIGTERM ||
+		(typeof signal === 'string' && signal.toUpperCase() === 'SIGTERM');
+};
+
+const getForceKillAfterTimeout = ({forceKillAfterTimeout = true}) => {
+	if (forceKillAfterTimeout === true) {
+		return DEFAULT_FORCE_KILL_TIMEOUT;
+	}
+
+	if (!Number.isFinite(forceKillAfterTimeout) || forceKillAfterTimeout < 0) {
+		throw new TypeError(`Expected the \`forceKillAfterTimeout\` option to be a non-negative integer, got \`${forceKillAfterTimeout}\` (${typeof forceKillAfterTimeout})`);
+	}
+
+	return forceKillAfterTimeout;
+};
+
+// `childProcess.cancel()`
+const spawnedCancel = (spawned, context) => {
+	const killResult = spawned.kill();
+
+	if (killResult) {
+		context.isCanceled = true;
+	}
+};
+
+const timeoutKill = (spawned, signal, reject) => {
+	spawned.kill(signal);
+	reject(Object.assign(new Error('Timed out'), {timedOut: true, signal}));
+};
+
+// `timeout` option handling
+const setupTimeout = (spawned, {timeout, killSignal = 'SIGTERM'}, spawnedPromise) => {
+	if (timeout === 0 || timeout === undefined) {
+		return spawnedPromise;
+	}
+
+	let timeoutId;
+	const timeoutPromise = new Promise((resolve, reject) => {
+		timeoutId = setTimeout(() => {
+			timeoutKill(spawned, killSignal, reject);
+		}, timeout);
+	});
+
+	const safeSpawnedPromise = spawnedPromise.finally(() => {
+		clearTimeout(timeoutId);
+	});
+
+	return Promise.race([timeoutPromise, safeSpawnedPromise]);
+};
+
+const validateTimeout = ({timeout}) => {
+	if (timeout !== undefined && (!Number.isFinite(timeout) || timeout < 0)) {
+		throw new TypeError(`Expected the \`timeout\` option to be a non-negative integer, got \`${timeout}\` (${typeof timeout})`);
+	}
+};
+
+// `cleanup` option handling
+const setExitHandler = async (spawned, {cleanup, detached}, timedPromise) => {
+	if (!cleanup || detached) {
+		return timedPromise;
+	}
+
+	const removeExitHandler = onExit(() => {
+		spawned.kill();
+	});
+
+	return timedPromise.finally(() => {
+		removeExitHandler();
+	});
+};
+
+module.exports = {
+	spawnedKill,
+	spawnedCancel,
+	setupTimeout,
+	validateTimeout,
+	setExitHandler
+};
+
+
+/***/ }),
+
+/***/ 4881:
+/***/ ((module) => {
+
+"use strict";
+
+
+const nativePromisePrototype = (async () => {})().constructor.prototype;
+const descriptors = ['then', 'catch', 'finally'].map(property => [
+	property,
+	Reflect.getOwnPropertyDescriptor(nativePromisePrototype, property)
+]);
+
+// The return value is a mixin of `childProcess` and `Promise`
+const mergePromise = (spawned, promise) => {
+	for (const [property, descriptor] of descriptors) {
+		// Starting the main `promise` is deferred to avoid consuming streams
+		const value = typeof promise === 'function' ?
+			(...args) => Reflect.apply(descriptor.value, promise(), args) :
+			descriptor.value.bind(promise);
+
+		Reflect.defineProperty(spawned, property, {...descriptor, value});
+	}
+
+	return spawned;
+};
+
+// Use promises instead of `child_process` events
+const getSpawnedPromise = spawned => {
+	return new Promise((resolve, reject) => {
+		spawned.on('exit', (exitCode, signal) => {
+			resolve({exitCode, signal});
+		});
+
+		spawned.on('error', error => {
+			reject(error);
+		});
+
+		if (spawned.stdin) {
+			spawned.stdin.on('error', error => {
+				reject(error);
+			});
+		}
+	});
+};
+
+module.exports = {
+	mergePromise,
+	getSpawnedPromise
+};
+
+
+
+/***/ }),
+
+/***/ 3346:
+/***/ ((module) => {
+
+"use strict";
+
+const aliases = ['stdin', 'stdout', 'stderr'];
+
+const hasAlias = options => aliases.some(alias => options[alias] !== undefined);
+
+const normalizeStdio = options => {
+	if (!options) {
+		return;
+	}
+
+	const {stdio} = options;
+
+	if (stdio === undefined) {
+		return aliases.map(alias => options[alias]);
+	}
+
+	if (hasAlias(options)) {
+		throw new Error(`It's not possible to provide \`stdio\` in combination with one of ${aliases.map(alias => `\`${alias}\``).join(', ')}`);
+	}
+
+	if (typeof stdio === 'string') {
+		return stdio;
+	}
+
+	if (!Array.isArray(stdio)) {
+		throw new TypeError(`Expected \`stdio\` to be of type \`string\` or \`Array\`, got \`${typeof stdio}\``);
+	}
+
+	const length = Math.max(stdio.length, aliases.length);
+	return Array.from({length}, (value, index) => stdio[index]);
+};
+
+module.exports = normalizeStdio;
+
+// `ipc` is pushed unless it is already present
+module.exports.node = options => {
+	const stdio = normalizeStdio(options);
+
+	if (stdio === 'ipc') {
+		return 'ipc';
+	}
+
+	if (stdio === undefined || typeof stdio === 'string') {
+		return [stdio, stdio, stdio, 'ipc'];
+	}
+
+	if (stdio.includes('ipc')) {
+		return stdio;
+	}
+
+	return [...stdio, 'ipc'];
+};
+
+
+/***/ }),
+
+/***/ 3351:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const isStream = __nccwpck_require__(1705);
+const getStream = __nccwpck_require__(8866);
+const mergeStream = __nccwpck_require__(584);
+
+// `input` option
+const handleInput = (spawned, input) => {
+	// Checking for stdin is workaround for https://github.com/nodejs/node/issues/26852
+	// @todo remove `|| spawned.stdin === undefined` once we drop support for Node.js <=12.2.0
+	if (input === undefined || spawned.stdin === undefined) {
+		return;
+	}
+
+	if (isStream(input)) {
+		input.pipe(spawned.stdin);
+	} else {
+		spawned.stdin.end(input);
+	}
+};
+
+// `all` interleaves `stdout` and `stderr`
+const makeAllStream = (spawned, {all}) => {
+	if (!all || (!spawned.stdout && !spawned.stderr)) {
+		return;
+	}
+
+	const mixed = mergeStream();
+
+	if (spawned.stdout) {
+		mixed.add(spawned.stdout);
+	}
+
+	if (spawned.stderr) {
+		mixed.add(spawned.stderr);
+	}
+
+	return mixed;
+};
+
+// On failure, `result.stdout|stderr|all` should contain the currently buffered stream
+const getBufferedData = async (stream, streamPromise) => {
+	if (!stream) {
+		return;
+	}
+
+	stream.destroy();
+
+	try {
+		return await streamPromise;
+	} catch (error) {
+		return error.bufferedData;
+	}
+};
+
+const getStreamPromise = (stream, {encoding, buffer, maxBuffer}) => {
+	if (!stream || !buffer) {
+		return;
+	}
+
+	if (encoding) {
+		return getStream(stream, {encoding, maxBuffer});
+	}
+
+	return getStream.buffer(stream, {maxBuffer});
+};
+
+// Retrieve result of child process: exit code, signal, error, streams (stdout/stderr/all)
+const getSpawnedResult = async ({stdout, stderr, all}, {encoding, buffer, maxBuffer}, processDone) => {
+	const stdoutPromise = getStreamPromise(stdout, {encoding, buffer, maxBuffer});
+	const stderrPromise = getStreamPromise(stderr, {encoding, buffer, maxBuffer});
+	const allPromise = getStreamPromise(all, {encoding, buffer, maxBuffer: maxBuffer * 2});
+
+	try {
+		return await Promise.all([processDone, stdoutPromise, stderrPromise, allPromise]);
+	} catch (error) {
+		return Promise.all([
+			{error, signal: error.signal, timedOut: error.timedOut},
+			getBufferedData(stdout, stdoutPromise),
+			getBufferedData(stderr, stderrPromise),
+			getBufferedData(all, allPromise)
+		]);
+	}
+};
+
+const validateInputSync = ({input}) => {
+	if (isStream(input)) {
+		throw new TypeError('The `input` option cannot be a stream in sync mode');
+	}
+};
+
+module.exports = {
+	handleInput,
+	makeAllStream,
+	getSpawnedResult,
+	validateInputSync
+};
+
+
+
+/***/ }),
+
+/***/ 5327:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const {PassThrough: PassThroughStream} = __nccwpck_require__(2781);
+
+module.exports = options => {
+	options = {...options};
+
+	const {array} = options;
+	let {encoding} = options;
+	const isBuffer = encoding === 'buffer';
+	let objectMode = false;
+
+	if (array) {
+		objectMode = !(encoding || isBuffer);
+	} else {
+		encoding = encoding || 'utf8';
+	}
+
+	if (isBuffer) {
+		encoding = null;
+	}
+
+	const stream = new PassThroughStream({objectMode});
+
+	if (encoding) {
+		stream.setEncoding(encoding);
+	}
+
+	let length = 0;
+	const chunks = [];
+
+	stream.on('data', chunk => {
+		chunks.push(chunk);
+
+		if (objectMode) {
+			length = chunks.length;
+		} else {
+			length += chunk.length;
+		}
+	});
+
+	stream.getBufferedValue = () => {
+		if (array) {
+			return chunks;
+		}
+
+		return isBuffer ? Buffer.concat(chunks, length) : chunks.join('');
+	};
+
+	stream.getBufferedLength = () => length;
+
+	return stream;
+};
+
+
+/***/ }),
+
+/***/ 8866:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const {constants: BufferConstants} = __nccwpck_require__(4300);
+const stream = __nccwpck_require__(2781);
+const {promisify} = __nccwpck_require__(3837);
+const bufferStream = __nccwpck_require__(5327);
+
+const streamPipelinePromisified = promisify(stream.pipeline);
+
+class MaxBufferError extends Error {
+	constructor() {
+		super('maxBuffer exceeded');
+		this.name = 'MaxBufferError';
+	}
+}
+
+async function getStream(inputStream, options) {
+	if (!inputStream) {
+		throw new Error('Expected a stream');
+	}
+
+	options = {
+		maxBuffer: Infinity,
+		...options
+	};
+
+	const {maxBuffer} = options;
+	const stream = bufferStream(options);
+
+	await new Promise((resolve, reject) => {
+		const rejectPromise = error => {
+			// Don't retrieve an oversized buffer.
+			if (error && stream.getBufferedLength() <= BufferConstants.MAX_LENGTH) {
+				error.bufferedData = stream.getBufferedValue();
+			}
+
+			reject(error);
+		};
+
+		(async () => {
+			try {
+				await streamPipelinePromisified(inputStream, stream);
+				resolve();
+			} catch (error) {
+				rejectPromise(error);
+			}
+		})();
+
+		stream.on('data', () => {
+			if (stream.getBufferedLength() > maxBuffer) {
+				rejectPromise(new MaxBufferError());
+			}
+		});
+	});
+
+	return stream.getBufferedValue();
+}
+
+module.exports = getStream;
+module.exports.buffer = (stream, options) => getStream(stream, {...options, encoding: 'buffer'});
+module.exports.array = (stream, options) => getStream(stream, {...options, array: true});
+module.exports.MaxBufferError = MaxBufferError;
+
+
+/***/ }),
+
+/***/ 7302:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", ({value:true}));exports.SIGNALS=void 0;
+
+const SIGNALS=[
+{
+name:"SIGHUP",
+number:1,
+action:"terminate",
+description:"Terminal closed",
+standard:"posix"},
+
+{
+name:"SIGINT",
+number:2,
+action:"terminate",
+description:"User interruption with CTRL-C",
+standard:"ansi"},
+
+{
+name:"SIGQUIT",
+number:3,
+action:"core",
+description:"User interruption with CTRL-\\",
+standard:"posix"},
+
+{
+name:"SIGILL",
+number:4,
+action:"core",
+description:"Invalid machine instruction",
+standard:"ansi"},
+
+{
+name:"SIGTRAP",
+number:5,
+action:"core",
+description:"Debugger breakpoint",
+standard:"posix"},
+
+{
+name:"SIGABRT",
+number:6,
+action:"core",
+description:"Aborted",
+standard:"ansi"},
+
+{
+name:"SIGIOT",
+number:6,
+action:"core",
+description:"Aborted",
+standard:"bsd"},
+
+{
+name:"SIGBUS",
+number:7,
+action:"core",
+description:
+"Bus error due to misaligned, non-existing address or paging error",
+standard:"bsd"},
+
+{
+name:"SIGEMT",
+number:7,
+action:"terminate",
+description:"Command should be emulated but is not implemented",
+standard:"other"},
+
+{
+name:"SIGFPE",
+number:8,
+action:"core",
+description:"Floating point arithmetic error",
+standard:"ansi"},
+
+{
+name:"SIGKILL",
+number:9,
+action:"terminate",
+description:"Forced termination",
+standard:"posix",
+forced:true},
+
+{
+name:"SIGUSR1",
+number:10,
+action:"terminate",
+description:"Application-specific signal",
+standard:"posix"},
+
+{
+name:"SIGSEGV",
+number:11,
+action:"core",
+description:"Segmentation fault",
+standard:"ansi"},
+
+{
+name:"SIGUSR2",
+number:12,
+action:"terminate",
+description:"Application-specific signal",
+standard:"posix"},
+
+{
+name:"SIGPIPE",
+number:13,
+action:"terminate",
+description:"Broken pipe or socket",
+standard:"posix"},
+
+{
+name:"SIGALRM",
+number:14,
+action:"terminate",
+description:"Timeout or timer",
+standard:"posix"},
+
+{
+name:"SIGTERM",
+number:15,
+action:"terminate",
+description:"Termination",
+standard:"ansi"},
+
+{
+name:"SIGSTKFLT",
+number:16,
+action:"terminate",
+description:"Stack is empty or overflowed",
+standard:"other"},
+
+{
+name:"SIGCHLD",
+number:17,
+action:"ignore",
+description:"Child process terminated, paused or unpaused",
+standard:"posix"},
+
+{
+name:"SIGCLD",
+number:17,
+action:"ignore",
+description:"Child process terminated, paused or unpaused",
+standard:"other"},
+
+{
+name:"SIGCONT",
+number:18,
+action:"unpause",
+description:"Unpaused",
+standard:"posix",
+forced:true},
+
+{
+name:"SIGSTOP",
+number:19,
+action:"pause",
+description:"Paused",
+standard:"posix",
+forced:true},
+
+{
+name:"SIGTSTP",
+number:20,
+action:"pause",
+description:"Paused using CTRL-Z or \"suspend\"",
+standard:"posix"},
+
+{
+name:"SIGTTIN",
+number:21,
+action:"pause",
+description:"Background process cannot read terminal input",
+standard:"posix"},
+
+{
+name:"SIGBREAK",
+number:21,
+action:"terminate",
+description:"User interruption with CTRL-BREAK",
+standard:"other"},
+
+{
+name:"SIGTTOU",
+number:22,
+action:"pause",
+description:"Background process cannot write to terminal output",
+standard:"posix"},
+
+{
+name:"SIGURG",
+number:23,
+action:"ignore",
+description:"Socket received out-of-band data",
+standard:"bsd"},
+
+{
+name:"SIGXCPU",
+number:24,
+action:"core",
+description:"Process timed out",
+standard:"bsd"},
+
+{
+name:"SIGXFSZ",
+number:25,
+action:"core",
+description:"File too big",
+standard:"bsd"},
+
+{
+name:"SIGVTALRM",
+number:26,
+action:"terminate",
+description:"Timeout or timer",
+standard:"bsd"},
+
+{
+name:"SIGPROF",
+number:27,
+action:"terminate",
+description:"Timeout or timer",
+standard:"bsd"},
+
+{
+name:"SIGWINCH",
+number:28,
+action:"ignore",
+description:"Terminal window size changed",
+standard:"bsd"},
+
+{
+name:"SIGIO",
+number:29,
+action:"terminate",
+description:"I/O is available",
+standard:"other"},
+
+{
+name:"SIGPOLL",
+number:29,
+action:"terminate",
+description:"Watched event",
+standard:"other"},
+
+{
+name:"SIGINFO",
+number:29,
+action:"ignore",
+description:"Request for process information",
+standard:"other"},
+
+{
+name:"SIGPWR",
+number:30,
+action:"terminate",
+description:"Device running out of power",
+standard:"systemv"},
+
+{
+name:"SIGSYS",
+number:31,
+action:"core",
+description:"Invalid system call",
+standard:"other"},
+
+{
+name:"SIGUNUSED",
+number:31,
+action:"terminate",
+description:"Invalid system call",
+standard:"other"}];exports.SIGNALS=SIGNALS;
+//# sourceMappingURL=core.js.map
+
+/***/ }),
+
+/***/ 2912:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", ({value:true}));exports.signalsByNumber=exports.signalsByName=void 0;var _os=__nccwpck_require__(2037);
+
+var _signals=__nccwpck_require__(5871);
+var _realtime=__nccwpck_require__(2972);
+
+
+
+const getSignalsByName=function(){
+const signals=(0,_signals.getSignals)();
+return signals.reduce(getSignalByName,{});
+};
+
+const getSignalByName=function(
+signalByNameMemo,
+{name,number,description,supported,action,forced,standard})
+{
+return{
+...signalByNameMemo,
+[name]:{name,number,description,supported,action,forced,standard}};
+
+};
+
+const signalsByName=getSignalsByName();exports.signalsByName=signalsByName;
+
+
+
+
+const getSignalsByNumber=function(){
+const signals=(0,_signals.getSignals)();
+const length=_realtime.SIGRTMAX+1;
+const signalsA=Array.from({length},(value,number)=>
+getSignalByNumber(number,signals));
+
+return Object.assign({},...signalsA);
+};
+
+const getSignalByNumber=function(number,signals){
+const signal=findSignalByNumber(number,signals);
+
+if(signal===undefined){
+return{};
+}
+
+const{name,description,supported,action,forced,standard}=signal;
+return{
+[number]:{
+name,
+number,
+description,
+supported,
+action,
+forced,
+standard}};
+
+
+};
+
+
+
+const findSignalByNumber=function(number,signals){
+const signal=signals.find(({name})=>_os.constants.signals[name]===number);
+
+if(signal!==undefined){
+return signal;
+}
+
+return signals.find(signalA=>signalA.number===number);
+};
+
+const signalsByNumber=getSignalsByNumber();exports.signalsByNumber=signalsByNumber;
+//# sourceMappingURL=main.js.map
+
+/***/ }),
+
+/***/ 2972:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", ({value:true}));exports.SIGRTMAX=exports.getRealtimeSignals=void 0;
+const getRealtimeSignals=function(){
+const length=SIGRTMAX-SIGRTMIN+1;
+return Array.from({length},getRealtimeSignal);
+};exports.getRealtimeSignals=getRealtimeSignals;
+
+const getRealtimeSignal=function(value,index){
+return{
+name:`SIGRT${index+1}`,
+number:SIGRTMIN+index,
+action:"terminate",
+description:"Application-specific signal (realtime)",
+standard:"posix"};
+
+};
+
+const SIGRTMIN=34;
+const SIGRTMAX=64;exports.SIGRTMAX=SIGRTMAX;
+//# sourceMappingURL=realtime.js.map
+
+/***/ }),
+
+/***/ 5871:
+/***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
+
+"use strict";
+Object.defineProperty(exports, "__esModule", ({value:true}));exports.getSignals=void 0;var _os=__nccwpck_require__(2037);
+
+var _core=__nccwpck_require__(7302);
+var _realtime=__nccwpck_require__(2972);
+
+
+
+const getSignals=function(){
+const realtimeSignals=(0,_realtime.getRealtimeSignals)();
+const signals=[..._core.SIGNALS,...realtimeSignals].map(normalizeSignal);
+return signals;
+};exports.getSignals=getSignals;
+
+
+
+
+
+
+
+const normalizeSignal=function({
+name,
+number:defaultNumber,
+description,
+action,
+forced=false,
+standard})
+{
+const{
+signals:{[name]:constantSignal}}=
+_os.constants;
+const supported=constantSignal!==undefined;
+const number=supported?constantSignal:defaultNumber;
+return{name,number,description,supported,action,forced,standard};
+};
+//# sourceMappingURL=signals.js.map
+
+/***/ }),
+
+/***/ 8264:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -5922,7 +7946,274 @@ exports.isPlainObject = isPlainObject;
 
 /***/ }),
 
-/***/ 8534:
+/***/ 1705:
+/***/ ((module) => {
+
+"use strict";
+
+
+const isStream = stream =>
+	stream !== null &&
+	typeof stream === 'object' &&
+	typeof stream.pipe === 'function';
+
+isStream.writable = stream =>
+	isStream(stream) &&
+	stream.writable !== false &&
+	typeof stream._write === 'function' &&
+	typeof stream._writableState === 'object';
+
+isStream.readable = stream =>
+	isStream(stream) &&
+	stream.readable !== false &&
+	typeof stream._read === 'function' &&
+	typeof stream._readableState === 'object';
+
+isStream.duplex = stream =>
+	isStream.writable(stream) &&
+	isStream.readable(stream);
+
+isStream.transform = stream =>
+	isStream.duplex(stream) &&
+	typeof stream._transform === 'function';
+
+module.exports = isStream;
+
+
+/***/ }),
+
+/***/ 3629:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var fs = __nccwpck_require__(7147)
+var core
+if (process.platform === 'win32' || global.TESTING_WINDOWS) {
+  core = __nccwpck_require__(1433)
+} else {
+  core = __nccwpck_require__(7071)
+}
+
+module.exports = isexe
+isexe.sync = sync
+
+function isexe (path, options, cb) {
+  if (typeof options === 'function') {
+    cb = options
+    options = {}
+  }
+
+  if (!cb) {
+    if (typeof Promise !== 'function') {
+      throw new TypeError('callback not provided')
+    }
+
+    return new Promise(function (resolve, reject) {
+      isexe(path, options || {}, function (er, is) {
+        if (er) {
+          reject(er)
+        } else {
+          resolve(is)
+        }
+      })
+    })
+  }
+
+  core(path, options || {}, function (er, is) {
+    // ignore EACCES because that just means we aren't allowed to run it
+    if (er) {
+      if (er.code === 'EACCES' || options && options.ignoreErrors) {
+        er = null
+        is = false
+      }
+    }
+    cb(er, is)
+  })
+}
+
+function sync (path, options) {
+  // my kingdom for a filtered catch
+  try {
+    return core.sync(path, options || {})
+  } catch (er) {
+    if (options && options.ignoreErrors || er.code === 'EACCES') {
+      return false
+    } else {
+      throw er
+    }
+  }
+}
+
+
+/***/ }),
+
+/***/ 7071:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+module.exports = isexe
+isexe.sync = sync
+
+var fs = __nccwpck_require__(7147)
+
+function isexe (path, options, cb) {
+  fs.stat(path, function (er, stat) {
+    cb(er, er ? false : checkStat(stat, options))
+  })
+}
+
+function sync (path, options) {
+  return checkStat(fs.statSync(path), options)
+}
+
+function checkStat (stat, options) {
+  return stat.isFile() && checkMode(stat, options)
+}
+
+function checkMode (stat, options) {
+  var mod = stat.mode
+  var uid = stat.uid
+  var gid = stat.gid
+
+  var myUid = options.uid !== undefined ?
+    options.uid : process.getuid && process.getuid()
+  var myGid = options.gid !== undefined ?
+    options.gid : process.getgid && process.getgid()
+
+  var u = parseInt('100', 8)
+  var g = parseInt('010', 8)
+  var o = parseInt('001', 8)
+  var ug = u | g
+
+  var ret = (mod & o) ||
+    (mod & g) && gid === myGid ||
+    (mod & u) && uid === myUid ||
+    (mod & ug) && myUid === 0
+
+  return ret
+}
+
+
+/***/ }),
+
+/***/ 1433:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+module.exports = isexe
+isexe.sync = sync
+
+var fs = __nccwpck_require__(7147)
+
+function checkPathExt (path, options) {
+  var pathext = options.pathExt !== undefined ?
+    options.pathExt : process.env.PATHEXT
+
+  if (!pathext) {
+    return true
+  }
+
+  pathext = pathext.split(';')
+  if (pathext.indexOf('') !== -1) {
+    return true
+  }
+  for (var i = 0; i < pathext.length; i++) {
+    var p = pathext[i].toLowerCase()
+    if (p && path.substr(-p.length).toLowerCase() === p) {
+      return true
+    }
+  }
+  return false
+}
+
+function checkStat (stat, path, options) {
+  if (!stat.isSymbolicLink() && !stat.isFile()) {
+    return false
+  }
+  return checkPathExt(path, options)
+}
+
+function isexe (path, options, cb) {
+  fs.stat(path, function (er, stat) {
+    cb(er, er ? false : checkStat(stat, path, options))
+  })
+}
+
+function sync (path, options) {
+  return checkStat(fs.statSync(path), path, options)
+}
+
+
+/***/ }),
+
+/***/ 584:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+
+const { PassThrough } = __nccwpck_require__(2781);
+
+module.exports = function (/*streams...*/) {
+  var sources = []
+  var output  = new PassThrough({objectMode: true})
+
+  output.setMaxListeners(0)
+
+  output.add = add
+  output.isEmpty = isEmpty
+
+  output.on('unpipe', remove)
+
+  Array.prototype.slice.call(arguments).forEach(add)
+
+  return output
+
+  function add (source) {
+    if (Array.isArray(source)) {
+      source.forEach(add)
+      return this
+    }
+
+    sources.push(source);
+    source.once('end', remove.bind(null, source))
+    source.once('error', output.emit.bind(output, 'error'))
+    source.pipe(output, {end: false})
+    return this
+  }
+
+  function isEmpty () {
+    return sources.length == 0;
+  }
+
+  function remove (source) {
+    sources = sources.filter(function (it) { return it !== source })
+    if (!sources.length && output.readable) { output.end() }
+  }
+}
+
+
+/***/ }),
+
+/***/ 7416:
+/***/ ((module) => {
+
+"use strict";
+
+
+const mimicFn = (to, from) => {
+	for (const prop of Reflect.ownKeys(from)) {
+		Object.defineProperty(to, prop, Object.getOwnPropertyDescriptor(from, prop));
+	}
+
+	return to;
+};
+
+module.exports = mimicFn;
+// TODO: Remove this for the next major release
+module.exports["default"] = mimicFn;
+
+
+/***/ }),
+
+/***/ 7505:
 /***/ ((module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -5935,7 +8226,7 @@ function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'defau
 var Stream = _interopDefault(__nccwpck_require__(2781));
 var http = _interopDefault(__nccwpck_require__(3685));
 var Url = _interopDefault(__nccwpck_require__(7310));
-var whatwgUrl = _interopDefault(__nccwpck_require__(2871));
+var whatwgUrl = _interopDefault(__nccwpck_require__(3222));
 var https = _interopDefault(__nccwpck_require__(5687));
 var zlib = _interopDefault(__nccwpck_require__(9796));
 
@@ -6088,7 +8379,7 @@ FetchError.prototype.name = 'FetchError';
 
 let convert;
 try {
-	convert = (__nccwpck_require__(2431).convert);
+	convert = (__nccwpck_require__(3927).convert);
 } catch (e) {}
 
 const INTERNALS = Symbol('Body internals');
@@ -7627,10 +9918,65 @@ exports.FetchError = FetchError;
 
 /***/ }),
 
-/***/ 8666:
+/***/ 6463:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-var wrappy = __nccwpck_require__(9002)
+"use strict";
+
+const path = __nccwpck_require__(1017);
+const pathKey = __nccwpck_require__(5397);
+
+const npmRunPath = options => {
+	options = {
+		cwd: process.cwd(),
+		path: process.env[pathKey()],
+		execPath: process.execPath,
+		...options
+	};
+
+	let previous;
+	let cwdPath = path.resolve(options.cwd);
+	const result = [];
+
+	while (previous !== cwdPath) {
+		result.push(path.join(cwdPath, 'node_modules/.bin'));
+		previous = cwdPath;
+		cwdPath = path.resolve(cwdPath, '..');
+	}
+
+	// Ensure the running `node` binary is used
+	const execPathDir = path.resolve(options.cwd, options.execPath, '..');
+	result.push(execPathDir);
+
+	return result.concat(options.path).join(path.delimiter);
+};
+
+module.exports = npmRunPath;
+// TODO: Remove this for the next major release
+module.exports["default"] = npmRunPath;
+
+module.exports.env = options => {
+	options = {
+		env: process.env,
+		...options
+	};
+
+	const env = {...options.env};
+	const path = pathKey({env});
+
+	options.path = env[path];
+	env[path] = module.exports(options);
+
+	return env;
+};
+
+
+/***/ }),
+
+/***/ 3534:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+var wrappy = __nccwpck_require__(660)
 module.exports = wrappy(once)
 module.exports.strict = wrappy(onceStrict)
 
@@ -7676,7 +10022,413 @@ function onceStrict (fn) {
 
 /***/ }),
 
-/***/ 7801:
+/***/ 2494:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const mimicFn = __nccwpck_require__(7416);
+
+const calledFunctions = new WeakMap();
+
+const onetime = (function_, options = {}) => {
+	if (typeof function_ !== 'function') {
+		throw new TypeError('Expected a function');
+	}
+
+	let returnValue;
+	let callCount = 0;
+	const functionName = function_.displayName || function_.name || '<anonymous>';
+
+	const onetime = function (...arguments_) {
+		calledFunctions.set(onetime, ++callCount);
+
+		if (callCount === 1) {
+			returnValue = function_.apply(this, arguments_);
+			function_ = null;
+		} else if (options.throw === true) {
+			throw new Error(`Function \`${functionName}\` can only be called once`);
+		}
+
+		return returnValue;
+	};
+
+	mimicFn(onetime, function_);
+	calledFunctions.set(onetime, callCount);
+
+	return onetime;
+};
+
+module.exports = onetime;
+// TODO: Remove this for the next major release
+module.exports["default"] = onetime;
+
+module.exports.callCount = function_ => {
+	if (!calledFunctions.has(function_)) {
+		throw new Error(`The given function \`${function_.name}\` is not wrapped by the \`onetime\` package`);
+	}
+
+	return calledFunctions.get(function_);
+};
+
+
+/***/ }),
+
+/***/ 5397:
+/***/ ((module) => {
+
+"use strict";
+
+
+const pathKey = (options = {}) => {
+	const environment = options.env || process.env;
+	const platform = options.platform || process.platform;
+
+	if (platform !== 'win32') {
+		return 'PATH';
+	}
+
+	return Object.keys(environment).reverse().find(key => key.toUpperCase() === 'PATH') || 'Path';
+};
+
+module.exports = pathKey;
+// TODO: Remove this for the next major release
+module.exports["default"] = pathKey;
+
+
+/***/ }),
+
+/***/ 9238:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+"use strict";
+
+const shebangRegex = __nccwpck_require__(6339);
+
+module.exports = (string = '') => {
+	const match = string.match(shebangRegex);
+
+	if (!match) {
+		return null;
+	}
+
+	const [path, argument] = match[0].replace(/#! ?/, '').split(' ');
+	const binary = path.split('/').pop();
+
+	if (binary === 'env') {
+		return argument;
+	}
+
+	return argument ? `${binary} ${argument}` : binary;
+};
+
+
+/***/ }),
+
+/***/ 6339:
+/***/ ((module) => {
+
+"use strict";
+
+module.exports = /^#!(.*)/;
+
+
+/***/ }),
+
+/***/ 2872:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+// Note: since nyc uses this module to output coverage, any lines
+// that are in the direct sync flow of nyc's outputCoverage are
+// ignored, since we can never get coverage for them.
+// grab a reference to node's real process object right away
+var process = global.process
+
+const processOk = function (process) {
+  return process &&
+    typeof process === 'object' &&
+    typeof process.removeListener === 'function' &&
+    typeof process.emit === 'function' &&
+    typeof process.reallyExit === 'function' &&
+    typeof process.listeners === 'function' &&
+    typeof process.kill === 'function' &&
+    typeof process.pid === 'number' &&
+    typeof process.on === 'function'
+}
+
+// some kind of non-node environment, just no-op
+/* istanbul ignore if */
+if (!processOk(process)) {
+  module.exports = function () {
+    return function () {}
+  }
+} else {
+  var assert = __nccwpck_require__(9491)
+  var signals = __nccwpck_require__(6232)
+  var isWin = /^win/i.test(process.platform)
+
+  var EE = __nccwpck_require__(2361)
+  /* istanbul ignore if */
+  if (typeof EE !== 'function') {
+    EE = EE.EventEmitter
+  }
+
+  var emitter
+  if (process.__signal_exit_emitter__) {
+    emitter = process.__signal_exit_emitter__
+  } else {
+    emitter = process.__signal_exit_emitter__ = new EE()
+    emitter.count = 0
+    emitter.emitted = {}
+  }
+
+  // Because this emitter is a global, we have to check to see if a
+  // previous version of this library failed to enable infinite listeners.
+  // I know what you're about to say.  But literally everything about
+  // signal-exit is a compromise with evil.  Get used to it.
+  if (!emitter.infinite) {
+    emitter.setMaxListeners(Infinity)
+    emitter.infinite = true
+  }
+
+  module.exports = function (cb, opts) {
+    /* istanbul ignore if */
+    if (!processOk(global.process)) {
+      return function () {}
+    }
+    assert.equal(typeof cb, 'function', 'a callback must be provided for exit handler')
+
+    if (loaded === false) {
+      load()
+    }
+
+    var ev = 'exit'
+    if (opts && opts.alwaysLast) {
+      ev = 'afterexit'
+    }
+
+    var remove = function () {
+      emitter.removeListener(ev, cb)
+      if (emitter.listeners('exit').length === 0 &&
+          emitter.listeners('afterexit').length === 0) {
+        unload()
+      }
+    }
+    emitter.on(ev, cb)
+
+    return remove
+  }
+
+  var unload = function unload () {
+    if (!loaded || !processOk(global.process)) {
+      return
+    }
+    loaded = false
+
+    signals.forEach(function (sig) {
+      try {
+        process.removeListener(sig, sigListeners[sig])
+      } catch (er) {}
+    })
+    process.emit = originalProcessEmit
+    process.reallyExit = originalProcessReallyExit
+    emitter.count -= 1
+  }
+  module.exports.unload = unload
+
+  var emit = function emit (event, code, signal) {
+    /* istanbul ignore if */
+    if (emitter.emitted[event]) {
+      return
+    }
+    emitter.emitted[event] = true
+    emitter.emit(event, code, signal)
+  }
+
+  // { <signal>: <listener fn>, ... }
+  var sigListeners = {}
+  signals.forEach(function (sig) {
+    sigListeners[sig] = function listener () {
+      /* istanbul ignore if */
+      if (!processOk(global.process)) {
+        return
+      }
+      // If there are no other listeners, an exit is coming!
+      // Simplest way: remove us and then re-send the signal.
+      // We know that this will kill the process, so we can
+      // safely emit now.
+      var listeners = process.listeners(sig)
+      if (listeners.length === emitter.count) {
+        unload()
+        emit('exit', null, sig)
+        /* istanbul ignore next */
+        emit('afterexit', null, sig)
+        /* istanbul ignore next */
+        if (isWin && sig === 'SIGHUP') {
+          // "SIGHUP" throws an `ENOSYS` error on Windows,
+          // so use a supported signal instead
+          sig = 'SIGINT'
+        }
+        /* istanbul ignore next */
+        process.kill(process.pid, sig)
+      }
+    }
+  })
+
+  module.exports.signals = function () {
+    return signals
+  }
+
+  var loaded = false
+
+  var load = function load () {
+    if (loaded || !processOk(global.process)) {
+      return
+    }
+    loaded = true
+
+    // This is the number of onSignalExit's that are in play.
+    // It's important so that we can count the correct number of
+    // listeners on signals, and don't wait for the other one to
+    // handle it instead of us.
+    emitter.count += 1
+
+    signals = signals.filter(function (sig) {
+      try {
+        process.on(sig, sigListeners[sig])
+        return true
+      } catch (er) {
+        return false
+      }
+    })
+
+    process.emit = processEmit
+    process.reallyExit = processReallyExit
+  }
+  module.exports.load = load
+
+  var originalProcessReallyExit = process.reallyExit
+  var processReallyExit = function processReallyExit (code) {
+    /* istanbul ignore if */
+    if (!processOk(global.process)) {
+      return
+    }
+    process.exitCode = code || /* istanbul ignore next */ 0
+    emit('exit', process.exitCode, null)
+    /* istanbul ignore next */
+    emit('afterexit', process.exitCode, null)
+    /* istanbul ignore next */
+    originalProcessReallyExit.call(process, process.exitCode)
+  }
+
+  var originalProcessEmit = process.emit
+  var processEmit = function processEmit (ev, arg) {
+    if (ev === 'exit' && processOk(global.process)) {
+      /* istanbul ignore else */
+      if (arg !== undefined) {
+        process.exitCode = arg
+      }
+      var ret = originalProcessEmit.apply(this, arguments)
+      /* istanbul ignore next */
+      emit('exit', process.exitCode, null)
+      /* istanbul ignore next */
+      emit('afterexit', process.exitCode, null)
+      /* istanbul ignore next */
+      return ret
+    } else {
+      return originalProcessEmit.apply(this, arguments)
+    }
+  }
+}
+
+
+/***/ }),
+
+/***/ 6232:
+/***/ ((module) => {
+
+// This is not the set of all possible signals.
+//
+// It IS, however, the set of all signals that trigger
+// an exit on either Linux or BSD systems.  Linux is a
+// superset of the signal names supported on BSD, and
+// the unknown signals just fail to register, so we can
+// catch that easily enough.
+//
+// Don't bother with SIGKILL.  It's uncatchable, which
+// means that we can't fire any callbacks anyway.
+//
+// If a user does happen to register a handler on a non-
+// fatal signal like SIGWINCH or something, and then
+// exit, it'll end up firing `process.emit('exit')`, so
+// the handler will be fired anyway.
+//
+// SIGBUS, SIGFPE, SIGSEGV and SIGILL, when not raised
+// artificially, inherently leave the process in a
+// state from which it is not safe to try and enter JS
+// listeners.
+module.exports = [
+  'SIGABRT',
+  'SIGALRM',
+  'SIGHUP',
+  'SIGINT',
+  'SIGTERM'
+]
+
+if (process.platform !== 'win32') {
+  module.exports.push(
+    'SIGVTALRM',
+    'SIGXCPU',
+    'SIGXFSZ',
+    'SIGUSR2',
+    'SIGTRAP',
+    'SIGSYS',
+    'SIGQUIT',
+    'SIGIOT'
+    // should detect profiler and enable/disable accordingly.
+    // see #21
+    // 'SIGPROF'
+  )
+}
+
+if (process.platform === 'linux') {
+  module.exports.push(
+    'SIGIO',
+    'SIGPOLL',
+    'SIGPWR',
+    'SIGSTKFLT',
+    'SIGUNUSED'
+  )
+}
+
+
+/***/ }),
+
+/***/ 182:
+/***/ ((module) => {
+
+"use strict";
+
+
+module.exports = input => {
+	const LF = typeof input === 'string' ? '\n' : '\n'.charCodeAt();
+	const CR = typeof input === 'string' ? '\r' : '\r'.charCodeAt();
+
+	if (input[input.length - 1] === LF) {
+		input = input.slice(0, input.length - 1);
+	}
+
+	if (input[input.length - 1] === CR) {
+		input = input.slice(0, input.length - 1);
+	}
+
+	return input;
+};
+
+
+/***/ }),
+
+/***/ 9557:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
@@ -7877,15 +10629,15 @@ module.exports.PROCESSING_OPTIONS = PROCESSING_OPTIONS;
 
 /***/ }),
 
-/***/ 7265:
+/***/ 6610:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
-module.exports = __nccwpck_require__(2686);
+module.exports = __nccwpck_require__(2151);
 
 
 /***/ }),
 
-/***/ 2686:
+/***/ 2151:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
@@ -8157,7 +10909,7 @@ exports.debug = debug; // for test
 
 /***/ }),
 
-/***/ 7081:
+/***/ 3170:
 /***/ ((__unused_webpack_module, exports) => {
 
 "use strict";
@@ -8183,7 +10935,7 @@ exports.getUserAgent = getUserAgent;
 
 /***/ }),
 
-/***/ 6886:
+/***/ 4210:
 /***/ ((module) => {
 
 "use strict";
@@ -8380,12 +11132,12 @@ conversions["RegExp"] = function (V, opts) {
 
 /***/ }),
 
-/***/ 4383:
+/***/ 4396:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
-const usm = __nccwpck_require__(640);
+const usm = __nccwpck_require__(433);
 
 exports.implementation = class URLImpl {
   constructor(constructorArgs) {
@@ -8588,15 +11340,15 @@ exports.implementation = class URLImpl {
 
 /***/ }),
 
-/***/ 2306:
+/***/ 6671:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-const conversions = __nccwpck_require__(6886);
-const utils = __nccwpck_require__(6723);
-const Impl = __nccwpck_require__(4383);
+const conversions = __nccwpck_require__(4210);
+const utils = __nccwpck_require__(7427);
+const Impl = __nccwpck_require__(4396);
 
 const impl = utils.implSymbol;
 
@@ -8792,32 +11544,32 @@ module.exports = {
 
 /***/ }),
 
-/***/ 2871:
+/***/ 3222:
 /***/ ((__unused_webpack_module, exports, __nccwpck_require__) => {
 
 "use strict";
 
 
-exports.URL = __nccwpck_require__(2306)["interface"];
-exports.serializeURL = __nccwpck_require__(640).serializeURL;
-exports.serializeURLOrigin = __nccwpck_require__(640).serializeURLOrigin;
-exports.basicURLParse = __nccwpck_require__(640).basicURLParse;
-exports.setTheUsername = __nccwpck_require__(640).setTheUsername;
-exports.setThePassword = __nccwpck_require__(640).setThePassword;
-exports.serializeHost = __nccwpck_require__(640).serializeHost;
-exports.serializeInteger = __nccwpck_require__(640).serializeInteger;
-exports.parseURL = __nccwpck_require__(640).parseURL;
+exports.URL = __nccwpck_require__(6671)["interface"];
+exports.serializeURL = __nccwpck_require__(433).serializeURL;
+exports.serializeURLOrigin = __nccwpck_require__(433).serializeURLOrigin;
+exports.basicURLParse = __nccwpck_require__(433).basicURLParse;
+exports.setTheUsername = __nccwpck_require__(433).setTheUsername;
+exports.setThePassword = __nccwpck_require__(433).setThePassword;
+exports.serializeHost = __nccwpck_require__(433).serializeHost;
+exports.serializeInteger = __nccwpck_require__(433).serializeInteger;
+exports.parseURL = __nccwpck_require__(433).parseURL;
 
 
 /***/ }),
 
-/***/ 640:
+/***/ 433:
 /***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
 
 "use strict";
 
 const punycode = __nccwpck_require__(5477);
-const tr46 = __nccwpck_require__(7801);
+const tr46 = __nccwpck_require__(9557);
 
 const specialSchemes = {
   ftp: 21,
@@ -10116,7 +12868,7 @@ module.exports.parseURL = function (input, options) {
 
 /***/ }),
 
-/***/ 6723:
+/***/ 7427:
 /***/ ((module) => {
 
 "use strict";
@@ -10144,7 +12896,139 @@ module.exports.implForWrapper = function (wrapper) {
 
 /***/ }),
 
-/***/ 9002:
+/***/ 2355:
+/***/ ((module, __unused_webpack_exports, __nccwpck_require__) => {
+
+const isWindows = process.platform === 'win32' ||
+    process.env.OSTYPE === 'cygwin' ||
+    process.env.OSTYPE === 'msys'
+
+const path = __nccwpck_require__(1017)
+const COLON = isWindows ? ';' : ':'
+const isexe = __nccwpck_require__(3629)
+
+const getNotFoundError = (cmd) =>
+  Object.assign(new Error(`not found: ${cmd}`), { code: 'ENOENT' })
+
+const getPathInfo = (cmd, opt) => {
+  const colon = opt.colon || COLON
+
+  // If it has a slash, then we don't bother searching the pathenv.
+  // just check the file itself, and that's it.
+  const pathEnv = cmd.match(/\//) || isWindows && cmd.match(/\\/) ? ['']
+    : (
+      [
+        // windows always checks the cwd first
+        ...(isWindows ? [process.cwd()] : []),
+        ...(opt.path || process.env.PATH ||
+          /* istanbul ignore next: very unusual */ '').split(colon),
+      ]
+    )
+  const pathExtExe = isWindows
+    ? opt.pathExt || process.env.PATHEXT || '.EXE;.CMD;.BAT;.COM'
+    : ''
+  const pathExt = isWindows ? pathExtExe.split(colon) : ['']
+
+  if (isWindows) {
+    if (cmd.indexOf('.') !== -1 && pathExt[0] !== '')
+      pathExt.unshift('')
+  }
+
+  return {
+    pathEnv,
+    pathExt,
+    pathExtExe,
+  }
+}
+
+const which = (cmd, opt, cb) => {
+  if (typeof opt === 'function') {
+    cb = opt
+    opt = {}
+  }
+  if (!opt)
+    opt = {}
+
+  const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt)
+  const found = []
+
+  const step = i => new Promise((resolve, reject) => {
+    if (i === pathEnv.length)
+      return opt.all && found.length ? resolve(found)
+        : reject(getNotFoundError(cmd))
+
+    const ppRaw = pathEnv[i]
+    const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw
+
+    const pCmd = path.join(pathPart, cmd)
+    const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd
+      : pCmd
+
+    resolve(subStep(p, i, 0))
+  })
+
+  const subStep = (p, i, ii) => new Promise((resolve, reject) => {
+    if (ii === pathExt.length)
+      return resolve(step(i + 1))
+    const ext = pathExt[ii]
+    isexe(p + ext, { pathExt: pathExtExe }, (er, is) => {
+      if (!er && is) {
+        if (opt.all)
+          found.push(p + ext)
+        else
+          return resolve(p + ext)
+      }
+      return resolve(subStep(p, i, ii + 1))
+    })
+  })
+
+  return cb ? step(0).then(res => cb(null, res), cb) : step(0)
+}
+
+const whichSync = (cmd, opt) => {
+  opt = opt || {}
+
+  const { pathEnv, pathExt, pathExtExe } = getPathInfo(cmd, opt)
+  const found = []
+
+  for (let i = 0; i < pathEnv.length; i ++) {
+    const ppRaw = pathEnv[i]
+    const pathPart = /^".*"$/.test(ppRaw) ? ppRaw.slice(1, -1) : ppRaw
+
+    const pCmd = path.join(pathPart, cmd)
+    const p = !pathPart && /^\.[\\\/]/.test(cmd) ? cmd.slice(0, 2) + pCmd
+      : pCmd
+
+    for (let j = 0; j < pathExt.length; j ++) {
+      const cur = p + pathExt[j]
+      try {
+        const is = isexe.sync(cur, { pathExt: pathExtExe })
+        if (is) {
+          if (opt.all)
+            found.push(cur)
+          else
+            return cur
+        }
+      } catch (ex) {}
+    }
+  }
+
+  if (opt.all && found.length)
+    return found
+
+  if (opt.nothrow)
+    return null
+
+  throw getNotFoundError(cmd)
+}
+
+module.exports = which
+which.sync = whichSync
+
+
+/***/ }),
+
+/***/ 660:
 /***/ ((module) => {
 
 // Returns a wrapper function that returns a wrapped callback
@@ -10184,7 +13068,7 @@ function wrappy (fn, cb) {
 
 /***/ }),
 
-/***/ 2431:
+/***/ 3927:
 /***/ ((module) => {
 
 module.exports = eval("require")("encoding");
@@ -10197,6 +13081,14 @@ module.exports = eval("require")("encoding");
 
 "use strict";
 module.exports = require("assert");
+
+/***/ }),
+
+/***/ 4300:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("buffer");
 
 /***/ }),
 
@@ -10261,6 +13153,14 @@ module.exports = require("os");
 
 "use strict";
 module.exports = require("path");
+
+/***/ }),
+
+/***/ 7282:
+/***/ ((module) => {
+
+"use strict";
+module.exports = require("process");
 
 /***/ }),
 
@@ -10378,7 +13278,7 @@ module.exports = JSON.parse('[[[0,44],"disallowed_STD3_valid"],[[45,46],"valid"]
 /******/ 	// startup
 /******/ 	// Load entry module and return exports
 /******/ 	// This entry module is referenced by other modules so it can't be inlined
-/******/ 	var __webpack_exports__ = __nccwpck_require__(212);
+/******/ 	var __webpack_exports__ = __nccwpck_require__(2280);
 /******/ 	module.exports = __webpack_exports__;
 /******/ 	
 /******/ })()
