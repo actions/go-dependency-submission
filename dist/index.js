@@ -114,10 +114,12 @@ function searchForFile(filename) {
         ]);
         const dirs = stdout
             .split('\n')
+            .filter(s => s.length > 0)
             // remove the file name
             .map((filename) => path.dirname(filename))
             // map to absolute path
             .map((pathname) => path.resolve(__dirname, pathname));
+        console.log(dirs);
         return dirs;
     });
 }
