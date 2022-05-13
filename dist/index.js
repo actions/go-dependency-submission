@@ -109,9 +109,9 @@ function searchForFile(filename) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(`searching for ${filename} in ${process.cwd()}`);
         const { stdout } = yield (0, execa_1.default)('find', [
-            `'${process.cwd()}'`,
+            process.cwd(),
             '-name',
-            `'${filename}'`
+            filename
         ]);
         console.log(stdout);
         const dirs = stdout

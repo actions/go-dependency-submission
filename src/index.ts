@@ -19,9 +19,9 @@ async function searchForFile (filename:string) {
   console.log(`searching for ${filename} in ${process.cwd()}`)
 
   const { stdout } = await execa('find', [
-    `'${process.cwd()}'`,
+    process.cwd(),
     '-name',
-    `'${filename}'`
+    filename
   ])
 
   console.log(stdout)
