@@ -107,19 +107,21 @@ const detector = {
 };
 function searchForFile(filename) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log(`searching for ${filename} in ${__dirname}`);
+        console.log(`searching for ${filename} in ${process.cwd()}`);
         const { stdout } = yield (0, execa_1.default)('find', [
             '.',
             '-name',
             `'${filename}'`
-        ]);
+        ], {
+            cwd: process.cwd()
+        });
         const dirs = stdout
             .split('\n')
             .filter(s => s.length > 0)
             // remove the file name
             .map((filename) => path.dirname(filename))
             // map to absolute path
-            .map((pathname) => path.resolve(__dirname, pathname));
+            .map((pathname) => path.resolve(process.cwd(), pathname));
         console.log(dirs);
         return dirs;
     });

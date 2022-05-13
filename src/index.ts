@@ -16,13 +16,16 @@ const detector = {
 }
 
 async function searchForFile (filename:string) {
-  console.log(`searching for ${filename} in ${__dirname}`)
+  console.log(`searching for ${filename} in ${process.cwd()}`)
 
   const { stdout } = await execa('find', [
     '.',
     '-name',
     `'${filename}'`
-  ])
+  ],
+  {
+    cwd: process.cwd()
+  })
 
   const dirs = stdout
     .split('\n')
@@ -30,7 +33,7 @@ async function searchForFile (filename:string) {
     // remove the file name
     .map((filename) => path.dirname(filename))
     // map to absolute path
-    .map((pathname) => path.resolve(__dirname, pathname))
+    .map((pathname) => path.resolve(process.cwd(), pathname))
 
   console.log(dirs)
 
