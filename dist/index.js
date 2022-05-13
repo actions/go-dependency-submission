@@ -109,7 +109,8 @@ function searchForFile(filename) {
     return __awaiter(this, void 0, void 0, function* () {
         const { stdout } = yield (0, execa_1.default)('find', [
             '.',
-            `-name ${filename}`
+            '-name',
+            `'${filename}'`
         ]);
         const dirs = stdout
             .split('\n')

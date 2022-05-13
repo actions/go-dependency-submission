@@ -18,7 +18,8 @@ const detector = {
 async function searchForFile (filename:string) {
   const { stdout } = await execa('find', [
     '.',
-    `-name ${filename}`
+    '-name',
+    `'${filename}'`
   ])
 
   const dirs = stdout
