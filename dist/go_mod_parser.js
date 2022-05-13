@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseDependents = void 0;
-const processor_1 = require("@github/dependency-snapshot-action/dist/processor");
+const processor_1 = require("@github/dependency-submission-toolkit/dist/processor");
 function parseDependents(contents) {
     const stdoutArr = contents.split('\n');
     const splitStdoutArr = stdoutArr.map(function (line) {

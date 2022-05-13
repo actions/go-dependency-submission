@@ -1,6 +1,6 @@
 import * as core from '@actions/core'
-import { run } from '@github/dependency-snapshot-action'
-import { ProcessDependenciesContent } from '@github/dependency-snapshot-action/dist/processor'
+import { run } from '@github/dependency-submission-toolkit'
+import { ProcessDependenciesContent } from '@github/dependency-submission-toolkit/dist/processor'
 import { parseDependents } from './go_mod_parser'
 import * as path from 'path'
 import * as process from 'process'

@@ -30,12 +30,12 @@
     "eslint-config-standard": "^17.0.0",
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.1.0",
-    "eslint-plugin-promise": "^6.0.0"
+    "eslint-plugin-promise": "^6.0.0",
+    "jest": "^27.5.1"
   },
   "dependencies": {
     "@actions/core": "^1.6.0",
     "@actions/github": "^5.0.0",
-    "@github/dependency-submission-toolkit": "^1.0.0",
-    "jest": "^27.5.1"
+    "@github/dependency-submission-toolkit": "^1.0.0"
   }
 }
