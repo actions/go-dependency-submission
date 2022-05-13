@@ -107,6 +107,7 @@ const detector = {
 };
 function searchForFile(filename) {
     return __awaiter(this, void 0, void 0, function* () {
+        console.log(`searching for ${filename} in ${__dirname}`);
         const { stdout } = yield (0, execa_1.default)('find', [
             '.',
             '-name',

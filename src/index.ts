@@ -16,6 +16,8 @@ const detector = {
 }
 
 async function searchForFile (filename:string) {
+  console.log(`searching for ${filename} in ${__dirname}`)
+
   const { stdout } = await execa('find', [
     '.',
     '-name',
