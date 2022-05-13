@@ -24,8 +24,6 @@ async function searchForFile (filename:string) {
     filename
   ])
 
-  console.log(stdout)
-
   const dirs = stdout
     .split('\n')
     .filter(s => s.length > 0)
@@ -33,8 +31,6 @@ async function searchForFile (filename:string) {
     .map((filename) => path.dirname(filename))
     // map to absolute path
     .map((pathname) => path.resolve(process.cwd(), pathname))
-
-  console.log(dirs)
 
   return dirs
 }

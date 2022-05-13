@@ -113,7 +113,6 @@ function searchForFile(filename) {
             '-name',
             filename
         ]);
-        console.log(stdout);
         const dirs = stdout
             .split('\n')
             .filter(s => s.length > 0)
@@ -121,7 +120,6 @@ function searchForFile(filename) {
             .map((filename) => path.dirname(filename))
             // map to absolute path
             .map((pathname) => path.resolve(process.cwd(), pathname));
-        console.log(dirs);
         return dirs;
     });
 }
