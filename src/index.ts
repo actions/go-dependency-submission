@@ -2,6 +2,9 @@ import * as core from '@actions/core'
 import { run } from '@github/dependency-snapshot-action'
 import { ProcessDependenciesContent } from '@github/dependency-snapshot-action/dist/processor'
 import { parseDependents } from './go_mod_parser'
+import * as path from 'path'
+import * as process from 'process'
+import execa from 'execa'
 
 const parseDependentsFunc: ProcessDependenciesContent = parseDependents
 
@@ -12,11 +15,43 @@ const detector = {
   version: core.getInput('detector-version')
 }
 
-// If provided, set the metadata provided from the action workflow input
-const metadataInput = core.getInput('metadata')
-if (metadataInput.length < 1) {
-  run(parseDependentsFunc, { command: 'go mod graph' }, { detector })
-} else {
-  const metadata = JSON.parse(metadataInput)
-  run(parseDependentsFunc, { command: 'go mod graph' }, { metadata, detector })
+async function searchForFile (filename:string) {
+  const { stdout } = await execa('find', [
+    '.',
+    `-name ${filename}`
+  ])
+
+  const dirs = stdout
+    .split('\n')
+    // remove the file name
+    .map((filename) => path.dirname(filename))
+    // map to absolute path
+    .map((pathname) => path.resolve(__dirname, pathname))
+
+  return dirs
 }
+
+// Enumerate directories
+async function detect () {
+  const goModPaths = searchForFile('go.mod')
+  const goSumPaths = searchForFile('go.sum')
+
+  // Concatenate both lists and remove duplicates
+  const allPaths = new Set((await goModPaths).concat(await goSumPaths))
+
+  // If provided, set the metadata provided from the action workflow input
+  const metadataInput = core.getInput('metadata')
+
+  allPaths.forEach((path) => {
+    process.chdir(path)
+    console.log(`Running go mod graph in ${path}`)
+    if (metadataInput.length < 1) {
+      run(parseDependentsFunc, { command: 'go mod graph' }, { detector })
+    } else {
+      const metadata = JSON.parse(metadataInput)
+      run(parseDependentsFunc, { command: 'go mod graph' }, { metadata, detector })
+    }
+  })
+}
+
+detect()
