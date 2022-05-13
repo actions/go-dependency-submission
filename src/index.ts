@@ -19,13 +19,12 @@ async function searchForFile (filename:string) {
   console.log(`searching for ${filename} in ${process.cwd()}`)
 
   const { stdout } = await execa('find', [
-    '.',
+    `'${process.cwd()}'`,
     '-name',
     `'${filename}'`
-  ],
-  {
-    cwd: process.cwd()
-  })
+  ])
+
+  console.log(stdout)
 
   const dirs = stdout
     .split('\n')

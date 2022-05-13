@@ -109,12 +109,11 @@ function searchForFile(filename) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(`searching for ${filename} in ${process.cwd()}`);
         const { stdout } = yield (0, execa_1.default)('find', [
-            '.',
+            `'${process.cwd()}'`,
             '-name',
             `'${filename}'`
-        ], {
-            cwd: process.cwd()
-        });
+        ]);
+        console.log(stdout);
         const dirs = stdout
             .split('\n')
             .filter(s => s.length > 0)
