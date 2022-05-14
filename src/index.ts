@@ -1,7 +1,10 @@
 import * as core from '@actions/core'
 import { run } from '@github/dependency-submission-toolkit'
 import { ProcessDependenciesContent } from '@github/dependency-submission-toolkit/dist/processor'
-import { Detector, Metadata } from '@github/dependency-submission-toolkit/dist/snapshot'
+import {
+  Detector,
+  Metadata
+} from '@github/dependency-submission-toolkit/dist/snapshot'
 import { parseDependents } from './parse-go-package'
 import * as path from 'path'
 import * as process from 'process'
@@ -36,21 +39,29 @@ async function detect () {
     if (!fs.existsSync(goBuildTarget)) {
       throw new Error(`The build target '${goBuildTarget}' does not exist`)
     }
-    if (goModDir !== "." && !goBuildTarget.startsWith(goModDir)) {
-      throw new Error(`The build target ${goBuildTarget} is not a sub-directory of ${goModDir}`)
+    if (goModDir !== '.' && !goBuildTarget.startsWith(goModDir)) {
+      throw new Error(
+        `The build target ${goBuildTarget} is not a sub-directory of ${goModDir}`
+      )
     }
   }
 
   const metadataInput = core.getInput('metadata')
 
   process.chdir(goModPath)
-  console.log(`Running go package detection in ${path} on build target ${goBuildTarget}`)
-  const options: {detector: Detector, metadata?: Metadata } = { detector }
+  console.log(
+    `Running go package detection in ${path} on build target ${goBuildTarget}`
+  )
+  const options: { detector: Detector; metadata?: Metadata } = { detector }
   if (metadataInput) {
     const metadata = JSON.parse(metadataInput)
     options.metadata = metadata
   }
-  run(parseDependentsFunc, { command: `${goListDependencies} ${goBuildTarget}` }, options)
+  run(
+    parseDependentsFunc,
+    { command: `${goListDependencies} ${goBuildTarget}` },
+    options
+  )
 }
 
 detect()

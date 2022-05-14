@@ -9,7 +9,14 @@ import path from 'path'
 // format "${GO_PACKAGE}@v{VERSION}"
 export function parseDependents (contents: string) {
   // split the input by newlines, sort, and dedup
-  const packages: string[] = Array.from(new Set(contents.split('\n').map(p => p.trim()).sort()))
+  const packages: string[] = Array.from(
+    new Set(
+      contents
+        .split('\n')
+        .map((p) => p.trim())
+        .sort()
+    )
+  )
 
   const entries: ParsedDependencies = {}
   packages.forEach((pkg: string) => {
