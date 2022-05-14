@@ -74,12 +74,12 @@ function detect() {
             if (!fs_1.default.existsSync(goBuildTarget)) {
                 throw new Error(`The build target '${goBuildTarget}' does not exist`);
             }
-            if (goModDir !== "." && !goBuildTarget.startsWith(goModDir)) {
+            if (goModDir !== '.' && !goBuildTarget.startsWith(goModDir)) {
                 throw new Error(`The build target ${goBuildTarget} is not a sub-directory of ${goModDir}`);
             }
         }
         const metadataInput = core.getInput('metadata');
-        process.chdir(goModPath);
+        process.chdir(goModDir);
         console.log(`Running go package detection in ${path} on build target ${goBuildTarget}`);
         const options = { detector };
         if (metadataInput) {
@@ -110,7 +110,10 @@ const path_1 = __importDefault(__nccwpck_require__(1017));
 // format "${GO_PACKAGE}@v{VERSION}"
 function parseDependents(contents) {
     // split the input by newlines, sort, and dedup
-    const packages = Array.from(new Set(contents.split('\n').map(p => p.trim()).sort()));
+    const packages = Array.from(new Set(contents
+        .split('\n')
+        .map((p) => p.trim())
+        .sort()));
     const entries = {};
     packages.forEach((pkg) => {
         if (!pkg)
