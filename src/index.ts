@@ -50,7 +50,7 @@ async function detect () {
 
   process.chdir(goModDir)
   console.log(
-    `Running go package detection in ${path} on build target ${goBuildTarget}`
+    `Running go package detection in ${process.cwd()} on build target ${goBuildTarget}`
   )
   const options: { detector: Detector; metadata?: Metadata } = { detector }
   if (metadataInput) {

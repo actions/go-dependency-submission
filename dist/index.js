@@ -80,7 +80,7 @@ function detect() {
         }
         const metadataInput = core.getInput('metadata');
         process.chdir(goModDir);
-        console.log(`Running go package detection in ${path} on build target ${goBuildTarget}`);
+        console.log(`Running go package detection in ${process.cwd()} on build target ${goBuildTarget}`);
         const options = { detector };
         if (metadataInput) {
             const metadata = JSON.parse(metadataInput);
