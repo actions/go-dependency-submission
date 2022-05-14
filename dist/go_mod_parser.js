@@ -3,9 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.parseDependents = void 0;
 const processor_1 = require("@github/dependency-submission-toolkit/dist/processor");
 function parseDependents(contents) {
-    const stdoutArr = contents.split("\n");
+    const stdoutArr = contents.split('\n');
     const splitStdoutArr = stdoutArr.map(function (line) {
-        return line.split(" ");
+        return line.split(' ');
     });
     const entries = {};
     const repoName = splitStdoutArr[0][0];
@@ -18,21 +18,21 @@ function parseDependents(contents) {
         const dependencyPkg = `pkg:golang/${line[1]}`;
         const matchFound = line[0].match(repoName);
         if (matchFound && matchFound.index != null) {
-            entries[dependencyPkg] = new processor_1.Entry(dependencyPkg, "direct");
+            entries[dependencyPkg] = new processor_1.Entry(dependencyPkg, 'direct');
             return;
         }
         if (targetPkg in entries) {
             targetEntry = entries[targetPkg];
         }
         else {
-            targetEntry = new processor_1.Entry(targetPkg, "indirect");
+            targetEntry = new processor_1.Entry(targetPkg, 'indirect');
             entries[targetPkg] = targetEntry;
         }
         if (dependencyPkg in entries) {
             dependencyEntry = entries[dependencyPkg];
         }
         else {
-            dependencyEntry = new processor_1.Entry(dependencyPkg, "indirect");
+            dependencyEntry = new processor_1.Entry(dependencyPkg, 'indirect');
             entries[dependencyPkg] = dependencyEntry;
         }
         targetEntry.addDependency(dependencyEntry);
