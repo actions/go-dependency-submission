@@ -48,7 +48,7 @@ async function detect () {
 
   const metadataInput = core.getInput('metadata')
 
-  process.chdir(goModPath)
+  process.chdir(goModDir)
   console.log(
     `Running go package detection in ${path} on build target ${goBuildTarget}`
   )
