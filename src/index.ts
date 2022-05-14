@@ -25,14 +25,20 @@ const goListDependencies = `go list -deps -f '{{define "M"}}{{.Path}}@{{.Version
 // Enumerate directories
 async function detect () {
   // If provided, set the metadata provided from the action workflow input
-  const goModPath = core.getInput('goModPath')
+  const goModPath = path.normalize(core.getInput('go-mod-path'))
   if (path.basename(goModPath) !== 'go.mod' && fs.existsSync(goModPath)) {
     throw new Error(`${goModPath} is not a go.mod file or does not exist!`)
   }
   const goModDir = path.dirname(goModPath)
-  const goBuildTarget = core.getInput('goBuildTarget')
-  if (goBuildTarget !== 'all' && goBuildTarget !== '...' && fs.existsSync(path.join(goModDir, goBuildTarget))) {
-    throw new Error(`The build target '${goBuildTarget}' does not exist at ${path.join(goModDir, goBuildTarget)}`)
+
+  const goBuildTarget = path.normalize(core.getInput('go-build-target'))
+  if (goBuildTarget !== 'all' && goBuildTarget !== '...') {
+    if (!fs.existsSync(goBuildTarget)) {
+      throw new Error(`The build target '${goBuildTarget}' does not exist`)
+    }
+    if (goModDir !== "." && !goBuildTarget.startsWith(goModDir)) {
+      throw new Error(`The build target ${goBuildTarget} is not a sub-directory of ${goModDir}`)
+    }
   }
 
   const metadataInput = core.getInput('metadata')
