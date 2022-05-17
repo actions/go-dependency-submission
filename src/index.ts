@@ -23,7 +23,8 @@ const detector = {
 // to build the build target It does not provide association between the
 // dependencies (i.e. which dependencies depend on which)
 // eslint-disable-next-line quotes
-const goListDependencies = `go list -deps -f '{{define \"M\\"}}{{.Path}}@{{.Version}}{{end}}{{with .Module}}{{if not .Main}}{{if .Replace}}{{template \\"M\\" .Replace}}{{else}}{{template \\"M\\" .}}{{end}}{{end}}{{end}}'`
+// eslint-disable-next-line no-useless-escape
+const goListDependencies = 'go list -deps -f \'{{define \"M\\"}}{{.Path}}@{{.Version}}{{end}}{{with .Module}}{{if not .Main}}{{if .Replace}}{{template \\"M\\" .Replace}}{{else}}{{template \\"M\\" .}}{{end}}{{end}}{{end}}\''
 
 // Enumerate directories
 async function detect () {
