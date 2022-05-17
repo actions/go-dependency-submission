@@ -3470,11 +3470,7 @@ function readDependencies(dependenciesProcessorFunc, manifestInfo = {}) {
                         std_err += data.toString();
                     }
                 };
-                options.cwd = '././';
-                const manifestCmdArr = manifestInfo.command.split(' ');
-                return exec
-                    .exec(manifestCmdArr[0], manifestCmdArr.slice(1, manifestCmdArr.length), options)
-                    .then((res) => {
+                return exec.exec(manifestInfo.command, undefined, options).then((res) => {
                     if (std_err) {
                         console.log(std_err);
                     }
