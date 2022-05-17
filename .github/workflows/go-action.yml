@@ -18,4 +18,4 @@ jobs:
         uses: dsp-testing/go-snapshot-action@lsep/go-list-impl
         with:
           go-mod-path: go-example/go.mod
-          go-build-target: cmd/octocat.go
+          go-build-target: go-example/cmd/octocat.go
