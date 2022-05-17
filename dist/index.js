@@ -60,7 +60,7 @@ const detector = {
 // dependencies (i.e. which dependencies depend on which)
 // eslint-disable-next-line quotes
 // eslint-disable-next-line no-useless-escape
-const goListDependencies = `go list -deps -f '{{define \"M\\"}}{{.Path}}@{{.Version}}{{end}}{{with .Module}}{{if not .Main}}{{if .Replace}}{{template \\"M\\" .Replace}}{{else}}{{template \\"M\\" .}}{{end}}{{end}}{{end}}'`;
+const goListDependencies = 'go list -deps -f "{{define \\"M\\"}}{{.Path}}@{{.Version}}{{end}}{{with .Module}}{{if not .Main}}{{if .Replace}}{{template \\"M\\" .Replace}}{{else}}{{template \\"M\\" .}}{{end}}{{end}}{{end}}"';
 // Enumerate directories
 function detect() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -80,15 +80,18 @@ function detect() {
             }
         }
         const metadataInput = core.getInput('metadata');
-        process.chdir(goModDir);
-        console.log(`Running go package detection in ${process.cwd()} on build target ${goBuildTarget}`);
-        const options = { detector };
-        if (metadataInput) {
-            const metadata = JSON.parse(metadataInput);
-            options.metadata = metadata;
-        }
-        (0, dependency_submission_toolkit_1.run)(parseDependentsFunc, { command: `${goListDependencies} ${goBuildTarget}` }, options);
+        go(goModDir, goBuildTarget, metadataInput);
     });
+}
+function go(goModDir, goBuildTarget, metadataInput) {
+    process.chdir(goModDir);
+    console.log(`Running go package detection in ${process.cwd()} on build target ${goBuildTarget}`);
+    const options = { detector };
+    if (metadataInput) {
+        const metadata = JSON.parse(metadataInput);
+        options.metadata = metadata;
+    }
+    (0, dependency_submission_toolkit_1.run)(parseDependentsFunc, { command: `${goListDependencies} ${goBuildTarget}` }, options);
 }
 detect();
 

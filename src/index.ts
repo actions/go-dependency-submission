@@ -24,7 +24,8 @@ const detector = {
 // dependencies (i.e. which dependencies depend on which)
 // eslint-disable-next-line quotes
 // eslint-disable-next-line no-useless-escape
-const goListDependencies = 'go list -deps -f \'{{define \"M\\"}}{{.Path}}@{{.Version}}{{end}}{{with .Module}}{{if not .Main}}{{if .Replace}}{{template \\"M\\" .Replace}}{{else}}{{template \\"M\\" .}}{{end}}{{end}}{{end}}\''
+const goListDependencies =
+  'go list -deps -f "{{define \\"M\\"}}{{.Path}}@{{.Version}}{{end}}{{with .Module}}{{if not .Main}}{{if .Replace}}{{template \\"M\\" .Replace}}{{else}}{{template \\"M\\" .}}{{end}}{{end}}{{end}}"'
 
 // Enumerate directories
 async function detect () {
@@ -48,7 +49,10 @@ async function detect () {
   }
 
   const metadataInput = core.getInput('metadata')
+  go(goModDir, goBuildTarget, metadataInput)
+}
 
+function go (goModDir: string, goBuildTarget: string, metadataInput?: string) {
   process.chdir(goModDir)
   console.log(
     `Running go package detection in ${process.cwd()} on build target ${goBuildTarget}`
