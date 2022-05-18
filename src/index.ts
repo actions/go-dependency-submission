@@ -15,18 +15,14 @@ const detector = {
   version: core.getInput('detector-version')
 }
 
-async function searchForFile (filename:string) {
+async function searchForFile (filename: string) {
   console.log(`searching for ${filename} in ${process.cwd()}`)
 
-  const { stdout } = await execa('find', [
-    process.cwd(),
-    '-name',
-    filename
-  ])
+  const { stdout } = await execa('find', [process.cwd(), '-name', filename])
 
   const dirs = stdout
     .split('\n')
-    .filter(s => s.length > 0)
+    .filter((s) => s.length > 0)
     // remove the file name
     .map((filename) => path.dirname(filename))
     // map to absolute path
@@ -37,23 +33,23 @@ async function searchForFile (filename:string) {
 
 // Enumerate directories
 async function detect () {
-  const goModPaths = searchForFile('go.mod')
-  const goSumPaths = searchForFile('go.sum')
-
-  // Concatenate both lists and remove duplicates
-  const allPaths = new Set((await goModPaths).concat(await goSumPaths))
+  const goModPaths = await searchForFile('go.mod')
 
   // If provided, set the metadata provided from the action workflow input
   const metadataInput = core.getInput('metadata')
 
-  allPaths.forEach((path) => {
+  goModPaths.forEach((path) => {
     process.chdir(path)
     console.log(`Running go mod graph in ${path}`)
     if (metadataInput.length < 1) {
       run(parseDependentsFunc, { command: 'go mod graph' }, { detector })
     } else {
       const metadata = JSON.parse(metadataInput)
-      run(parseDependentsFunc, { command: 'go mod graph' }, { metadata, detector })
+      run(
+        parseDependentsFunc,
+        { command: 'go mod graph' },
+        { metadata, detector }
+      )
     }
   })
 }
