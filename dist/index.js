@@ -75,7 +75,7 @@ function detect() {
             if (!fs_1.default.existsSync(goBuildTarget)) {
                 throw new Error(`The build target '${goBuildTarget}' does not exist`);
             }
-            if (goModDir !== '.' && !goBuildTarget.startsWith(goModDir)) {
+            if (goModDir !== '.') {
                 if (goBuildTarget.startsWith(goModDir)) {
                     goBuildTarget = goBuildTarget.replace(goModDir, '');
                 }

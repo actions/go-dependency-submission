@@ -41,7 +41,7 @@ async function detect () {
     if (!fs.existsSync(goBuildTarget)) {
       throw new Error(`The build target '${goBuildTarget}' does not exist`)
     }
-    if (goModDir !== '.' && !goBuildTarget.startsWith(goModDir)) {
+    if (goModDir !== '.') {
       if (goBuildTarget.startsWith(goModDir)) {
         goBuildTarget = goBuildTarget.replace(goModDir, '')
       } else {
