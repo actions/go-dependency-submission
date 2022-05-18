@@ -36,23 +36,27 @@ async function detect () {
   }
   const goModDir = path.dirname(goModPath)
 
-  const goBuildTarget = path.normalize(core.getInput('go-build-target'))
+  let goBuildTarget = path.normalize(core.getInput('go-build-target'))
   if (goBuildTarget !== 'all' && goBuildTarget !== '...') {
     if (!fs.existsSync(goBuildTarget)) {
       throw new Error(`The build target '${goBuildTarget}' does not exist`)
     }
     if (goModDir !== '.' && !goBuildTarget.startsWith(goModDir)) {
-      throw new Error(
-        `The build target ${goBuildTarget} is not a sub-directory of ${goModDir}`
-      )
+      if (goBuildTarget.startsWith(goModDir)) {
+        goBuildTarget = goBuildTarget.replace(goModDir, '')
+      } else {
+        throw new Error(
+          `The build target ${goBuildTarget} is not a sub-directory of ${goModDir}`
+        )
+      }
     }
   }
 
   const metadataInput = core.getInput('metadata')
-  go(goModDir, goBuildTarget, metadataInput)
+  processGoTarget(goModDir, goBuildTarget, metadataInput)
 }
 
-function go (goModDir: string, goBuildTarget: string, metadataInput?: string) {
+function processGoTarget (goModDir: string, goBuildTarget: string, metadataInput?: string) {
   process.chdir(goModDir)
   console.log(
     `Running go package detection in ${process.cwd()} on build target ${goBuildTarget}`
