@@ -56,7 +56,11 @@ async function detect () {
   processGoTarget(goModDir, goBuildTarget, metadataInput)
 }
 
-function processGoTarget (goModDir: string, goBuildTarget: string, metadataInput?: string) {
+function processGoTarget (
+  goModDir: string,
+  goBuildTarget: string,
+  metadataInput?: string
+) {
   process.chdir(goModDir)
   console.log(
     `Running go package detection in ${process.cwd()} on build target ${goBuildTarget}`
