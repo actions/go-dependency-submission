@@ -1,11 +1,10 @@
 package main
 
 import (
-	"fmt"
-
-	"golang.org/x/example/stringutil"
+	"github.com/fatih/color"
 )
 
 func main() {
-	fmt.Println(stringutil.Reverse("reverof stacotcO"))
+	c := color.New(color.FgCyan).Add(color.Underline).Add(color.BgHiMagenta)
+	c.Println("Octocats forever!")
 }
