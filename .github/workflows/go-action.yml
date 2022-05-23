@@ -1,10 +1,8 @@
 name: Go Action detection of dependencies
 on:
-  push
-# on:
-#   push:
-#     branches:
-#       - main
+  push:
+    branches:
+      - main
 jobs:
   go-action-detection:
     runs-on: ubuntu-latest
