@@ -44,6 +44,9 @@ async function detect () {
     if (goModDir !== '.') {
       if (goBuildTarget.startsWith(goModDir)) {
         goBuildTarget = goBuildTarget.replace(goModDir, '')
+        goBuildTarget = goBuildTarget.startsWith('/')
+          ? goBuildTarget.substring(1)
+          : goBuildTarget
       } else {
         throw new Error(
           `The build target ${goBuildTarget} is not a sub-directory of ${goModDir}`
