@@ -21,6 +21,13 @@ inputs:
   metadata:
     required: false
     description: 'User provided map of max key/value pairs of metadata to include with the snapshot e.g. {"lastModified": "12-31-2022"}'
+  go-mod-path:
+    required: true
+    description: 'Repo path to the go.mod file used to detect dependencies for the Go build target'
+  go-build-target:
+    required: true
+    description: 'Build target to detect build dependencies. If unspecified, will use "all", with will detect all dependencies used in all build targets (including tests and tools).'
+    default: 'all'
 runs:
   using: 'node16'
   main: 'dist/index.js'

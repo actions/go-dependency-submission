@@ -5,7 +5,7 @@ An Action that creates a dependency submission using `go mod graph`.
 Optional inputs for the Action include: `detector-name`, `detector-url`, `detector-version`, and `metadata` - a JSON of max eight keys to provide with the snapshot.
 
 ### Example
-```
+```yaml
 name: Go Action detection of dependencies
 on:
   push:
@@ -27,6 +27,16 @@ jobs:
       - name: Run snapshot action
         uses: @dsp-testing/go-snapshot-action
         with:
+            # Required: Define the repo path to the go.mod file used by the
+            # build target
+            go-mod-path: go-example/go.mod
+            #
+            # Define the repo path of a build target (a file with a
+            # `main()` function) If not defined, this Aciton will collect all
+            # dependencies used by all build targets for the module, which may
+            # include Go dependencies used by tests and tooling.
+            go-build-target: go-example/cmd/octocat.go
+            #
             # All of the below have defaults, but can be overriden manually
             detector-name: go snapshot action
             detector-url: ${{ github.server_url }}/${{ github.repository }}

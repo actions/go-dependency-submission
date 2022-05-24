@@ -1,10 +1,14 @@
 import * as core from '@actions/core'
 import { run } from '@github/dependency-submission-toolkit'
 import { ProcessDependenciesContent } from '@github/dependency-submission-toolkit/dist/processor'
-import { parseDependents } from './go_mod_parser'
+import {
+  Detector,
+  Metadata
+} from '@github/dependency-submission-toolkit/dist/snapshot'
+import { parseDependents } from './parse-go-package'
 import * as path from 'path'
 import * as process from 'process'
-import execa from 'execa'
+import fs from 'fs'
 
 const parseDependentsFunc: ProcessDependenciesContent = parseDependents
 
@@ -15,43 +19,65 @@ const detector = {
   version: core.getInput('detector-version')
 }
 
-async function searchForFile (filename: string) {
-  console.log(`searching for ${filename} in ${process.cwd()}`)
-
-  const { stdout } = await execa('find', [process.cwd(), '-name', filename])
-
-  const dirs = stdout
-    .split('\n')
-    .filter((s) => s.length > 0)
-    // remove the file name
-    .map((filename) => path.dirname(filename))
-    // map to absolute path
-    .map((pathname) => path.resolve(process.cwd(), pathname))
-
-  return dirs
-}
+// For a specific Go _build target_, this commands lists all dependencies used
+// to build the build target It does not provide association between the
+// dependencies (i.e. which dependencies depend on which)
+// eslint-disable-next-line quotes
+// eslint-disable-next-line no-useless-escape
+const goListDependencies =
+  'go list -deps -f "{{define \\"M\\"}}{{.Path}}@{{.Version}}{{end}}{{with .Module}}{{if not .Main}}{{if .Replace}}{{template \\"M\\" .Replace}}{{else}}{{template \\"M\\" .}}{{end}}{{end}}{{end}}"'
 
 // Enumerate directories
 async function detect () {
-  const goModPaths = await searchForFile('go.mod')
-
   // If provided, set the metadata provided from the action workflow input
-  const metadataInput = core.getInput('metadata')
+  const goModPath = path.normalize(core.getInput('go-mod-path'))
+  if (path.basename(goModPath) !== 'go.mod' && fs.existsSync(goModPath)) {
+    throw new Error(`${goModPath} is not a go.mod file or does not exist!`)
+  }
+  const goModDir = path.dirname(goModPath)
 
-  goModPaths.forEach((path) => {
-    process.chdir(path)
-    console.log(`Running go mod graph in ${path}`)
-    if (metadataInput.length < 1) {
-      run(parseDependentsFunc, { command: 'go mod graph' }, { detector })
-    } else {
-      const metadata = JSON.parse(metadataInput)
-      run(
-        parseDependentsFunc,
-        { command: 'go mod graph' },
-        { metadata, detector }
-      )
+  let goBuildTarget = path.normalize(core.getInput('go-build-target'))
+  if (goBuildTarget !== 'all' && goBuildTarget !== '...') {
+    if (!fs.existsSync(goBuildTarget)) {
+      throw new Error(`The build target '${goBuildTarget}' does not exist`)
     }
-  })
+    if (goModDir !== '.') {
+      if (goBuildTarget.startsWith(goModDir)) {
+        goBuildTarget = goBuildTarget.replace(goModDir, '')
+        goBuildTarget = goBuildTarget.startsWith('/')
+          ? goBuildTarget.substring(1)
+          : goBuildTarget
+      } else {
+        throw new Error(
+          `The build target ${goBuildTarget} is not a sub-directory of ${goModDir}`
+        )
+      }
+    }
+  }
+
+  const metadataInput = core.getInput('metadata')
+  processGoTarget(goModDir, goBuildTarget, metadataInput)
+}
+
+function processGoTarget (
+  goModDir: string,
+  goBuildTarget: string,
+  metadataInput?: string
+) {
+  process.chdir(goModDir)
+  console.log(
+    `Running go package detection in ${process.cwd()} on build target ${goBuildTarget}`
+  )
+  const options: { detector: Detector; metadata?: Metadata } = { detector }
+  if (metadataInput) {
+    const metadata = JSON.parse(metadataInput)
+    options.metadata = metadata
+  }
+  run(
+    parseDependentsFunc,
+    { command: `${goListDependencies} ${goBuildTarget}` },
+    options
+  )
 }
 
 detect()
