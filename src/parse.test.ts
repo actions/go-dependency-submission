@@ -1,5 +1,4 @@
-import { describe, expect, test } from '@jest/globals'
-import { parseGoList, parseGoModGraph } from './parse-go-package'
+import { parseGoList, parseGoModGraph } from './parse'
 
 const GO_DEPENDENCIES = `go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp@v1.7.0
 golang.org/x/sys@v0.0.0-20220317061510-51cd9980dadf

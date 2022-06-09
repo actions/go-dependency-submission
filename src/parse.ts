@@ -1,7 +1,7 @@
 import path from 'path'
 import { PackageURL } from 'packageurl-js'
 
-function goPackageToPackageURL(pkg: string): PackageURL {
+function parseGoPackage (pkg: string): PackageURL {
   const [qualifiedPackage, version] = pkg.split('@')
   const namespace = encodeURIComponent(path.dirname(qualifiedPackage))
   const name = path.basename(qualifiedPackage)
@@ -16,7 +16,7 @@ function goPackageToPackageURL(pkg: string): PackageURL {
  * @param {string} contents
  * @returns {Array<PackageURL>}
  */
-export function parseGoList(contents: string): Array<PackageURL> {
+export function parseGoList (contents: string): Array<PackageURL> {
   // split the input by newlines, sort, and dedup
   const packages: string[] = Array.from(
     new Set(contents.split('\n').map((p) => p.trim()))
@@ -24,7 +24,7 @@ export function parseGoList(contents: string): Array<PackageURL> {
   const purls: Array<PackageURL> = []
   packages.forEach((pkg: string) => {
     if (!pkg.trim()) return
-    purls.push(goPackageToPackageURL(pkg))
+    purls.push(parseGoPackage(pkg))
   })
   return purls
 }
@@ -34,17 +34,14 @@ export function parseGoList(contents: string): Array<PackageURL> {
  * an associative list of PackageURLs. This expects the output of 'go mod
  * graph' as input
  */
-export function parseGoModGraph(
+export function parseGoModGraph (
   contents: string
 ): Array<[PackageURL, PackageURL]> {
   const pkgAssocList: Array<[PackageURL, PackageURL]> = []
   contents.split('\n').forEach((line) => {
     if (!line.trim()) return
     const [parentPkg, childPkg] = line.split(' ')
-    pkgAssocList.push([
-      goPackageToPackageURL(parentPkg),
-      goPackageToPackageURL(childPkg)
-    ])
+    pkgAssocList.push([parseGoPackage(parentPkg), parseGoPackage(childPkg)])
   })
   return pkgAssocList
 }
