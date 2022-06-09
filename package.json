@@ -10,6 +10,7 @@
     "lint": "eslint --fix src/**/*.ts test/**/*.ts",
     "package": "ncc build --source-map --license licenses.txt",
     "test": "jest",
+    "test:watch": "jest --watch src",
     "all": "npm run build && npm run format && npm run lint && npm run package && npm test"
   },
   "repository": {
@@ -32,13 +33,13 @@
     "eslint-plugin-import": "^2.26.0",
     "eslint-plugin-n": "^15.1.0",
     "eslint-plugin-promise": "^6.0.0",
-    "jest": "^27.5.1",
+    "jest": "^28.0.0",
     "ts-jest": "^28.0.2",
     "typescript": "^4.6.4"
   },
   "dependencies": {
     "@actions/core": "^1.6.0",
     "@actions/github": "^5.0.0",
-    "@github/dependency-submission-toolkit": "^1.0.1"
+    "@github/dependency-submission-toolkit": "^1.1.1"
   }
 }
