@@ -2,6 +2,7 @@ import path from 'path'
 import fs from 'fs'
 
 import * as core from '@actions/core'
+import * as github from '@actions/github'
 import { Snapshot, submitSnapshot } from '@github/dependency-submission-toolkit'
 
 import { processGoGraph, processGoBuildTarget } from './process'
@@ -40,11 +41,18 @@ async function main () {
     goBuildTarget,
     packageCache
   )
-  const snapshot = new Snapshot({
-    name: 'github-go-dependency-detector',
-    url: 'https://github.com/github/github-go-dependency-detector',
-    version: '0.0.1'
-  })
+  const snapshot = new Snapshot(
+    {
+      name: 'github-go-dependency-detector',
+      url: 'https://github.com/github/github-go-dependency-detector',
+      version: '0.0.1'
+    },
+    github.context,
+    {
+      correlator: `${github.context.job}-${goBuildTarget}`,
+      id: github.context.runId.toString()
+    }
+  )
   snapshot.addManifest(manifest)
   submitSnapshot(snapshot)
 }
