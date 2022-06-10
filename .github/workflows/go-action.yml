@@ -12,7 +12,7 @@ jobs:
         with:
           go-version: ">=1.18.0"
       - name: Run snapshot action
-        uses: dsp-testing/go-snapshot-action@lsep/new-dep-sub-toolkit
+        uses: dsp-testing/go-snapshot-action@main
         with:
           go-mod-path: go-example/go.mod
           go-build-target: go-example/cmd/octocat.go
