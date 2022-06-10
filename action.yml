@@ -6,18 +6,6 @@ inputs:
     description: "GitHub Personal Access Token (PAT). Defaults to PAT provided by Action runner"
     required: false
     default: ${{ github.token }}
-  detector-name: 
-    required: false
-    description: 'Name of the detector running the go action e.g. Go Snapshot Detector'
-    default: 'Go Snapshot Action'
-  detector-url:
-    required: false
-    description: 'URL of the detector running the go action e.g. http://github.com/dsp-testing/go-snapshot-action'
-    default: 'http://github.com/dsp-testing/go-snapshot-action'
-  detector-version:
-    required: false
-    description: 'Version of the detector running the go action e.g. 0.0.1'
-    default: '0.0.1'
   metadata:
     required: false
     description: 'User provided map of max key/value pairs of metadata to include with the snapshot e.g. {"lastModified": "12-31-2022"}'

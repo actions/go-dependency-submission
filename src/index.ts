@@ -1,42 +1,22 @@
-import * as core from '@actions/core'
-import { run } from '@github/dependency-submission-toolkit'
-import { ProcessDependenciesContent } from '@github/dependency-submission-toolkit/dist/processor'
-import {
-  Detector,
-  Metadata
-} from '@github/dependency-submission-toolkit/dist/snapshot'
-import { parseDependents } from './parse-go-package'
-import * as path from 'path'
-import * as process from 'process'
+import path from 'path'
 import fs from 'fs'
 
-const parseDependentsFunc: ProcessDependenciesContent = parseDependents
+import * as core from '@actions/core'
+import * as github from '@actions/github'
+import { Snapshot, submitSnapshot } from '@github/dependency-submission-toolkit'
 
-// Set the detector information provided from the action workflow input
-const detector = {
-  name: core.getInput('detector-name'),
-  url: core.getInput('detector-url'),
-  version: core.getInput('detector-version')
-}
+import { processGoGraph, processGoBuildTarget } from './process'
 
-// For a specific Go _build target_, this commands lists all dependencies used
-// to build the build target It does not provide association between the
-// dependencies (i.e. which dependencies depend on which)
-// eslint-disable-next-line quotes
-// eslint-disable-next-line no-useless-escape
-const goListDependencies =
-  'go list -deps -f "{{define \\"M\\"}}{{.Path}}@{{.Version}}{{end}}{{with .Module}}{{if not .Main}}{{if .Replace}}{{template \\"M\\" .Replace}}{{else}}{{template \\"M\\" .}}{{end}}{{end}}{{end}}"'
-
-// Enumerate directories
-async function detect () {
-  // If provided, set the metadata provided from the action workflow input
+async function main () {
   const goModPath = path.normalize(core.getInput('go-mod-path'))
+
   if (path.basename(goModPath) !== 'go.mod' && fs.existsSync(goModPath)) {
     throw new Error(`${goModPath} is not a go.mod file or does not exist!`)
   }
   const goModDir = path.dirname(goModPath)
 
   let goBuildTarget = path.normalize(core.getInput('go-build-target'))
+
   if (goBuildTarget !== 'all' && goBuildTarget !== '...') {
     if (!fs.existsSync(goBuildTarget)) {
       throw new Error(`The build target '${goBuildTarget}' does not exist`)
@@ -55,29 +35,26 @@ async function detect () {
     }
   }
 
-  const metadataInput = core.getInput('metadata')
-  processGoTarget(goModDir, goBuildTarget, metadataInput)
+  const packageCache = await processGoGraph(goModDir)
+  const manifest = await processGoBuildTarget(
+    goModDir,
+    goBuildTarget,
+    packageCache
+  )
+  const snapshot = new Snapshot(
+    {
+      name: 'github-go-dependency-detector',
+      url: 'https://github.com/github/github-go-dependency-detector',
+      version: '0.0.1'
+    },
+    github.context,
+    {
+      correlator: `${github.context.job}-${goBuildTarget}`,
+      id: github.context.runId.toString()
+    }
+  )
+  snapshot.addManifest(manifest)
+  submitSnapshot(snapshot)
 }
 
-function processGoTarget (
-  goModDir: string,
-  goBuildTarget: string,
-  metadataInput?: string
-) {
-  process.chdir(goModDir)
-  console.log(
-    `Running go package detection in ${process.cwd()} on build target ${goBuildTarget}`
-  )
-  const options: { detector: Detector; metadata?: Metadata } = { detector }
-  if (metadataInput) {
-    const metadata = JSON.parse(metadataInput)
-    options.metadata = metadata
-  }
-  run(
-    parseDependentsFunc,
-    { command: `${goListDependencies} ${goBuildTarget}` },
-    options
-  )
-}
-
-detect()
+main()
