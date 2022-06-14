@@ -1,7 +1,7 @@
 {
-  "name": "go-snapshot-action",
+  "name": "go-dependency-submission",
   "version": "1.0.0",
-  "description": "Go Snapshot Action",
+  "description": "Go Dependency Submission",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
@@ -15,15 +15,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dsp-testing/go-snapshot-action.git"
+    "url": "git+https://github.com/dsp-testing/go-dependency-submission.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dsp-testing/go-snapshot-action/issues"
+    "url": "https://github.com/dsp-testing/go-dependency-submission/issues"
   },
-  "homepage": "https://github.com/dsp-testing/go-snapshot-action#readme",
+  "homepage": "https://github.com/dsp-testing/go-dependency-submission#readme",
   "devDependencies": {
     "@types/jest": "^27.5.2",
     "@typescript-eslint/eslint-plugin": "^5.20.0",

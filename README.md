@@ -1,12 +1,11 @@
-# Go Snapshot Action
+# Go Dependency Submission
 
-An Action that creates a dependency submission using `go mod graph`.
-
-Optional inputs for the Action include: `detector-name`, `detector-url`, `detector-version`, and `metadata` - a JSON of max eight keys to provide with the snapshot.
+An Action that calculates dependencies for a Go build-target (a Go file with a
+`main` function) and submits the list to the Dependency Submission API.
 
 ### Example
 ```yaml
-name: Go Action detection of dependencies
+name: Go Dependency Submission
 on:
   push:
     branches:
@@ -36,10 +35,4 @@ jobs:
             # dependencies used by all build targets for the module, which may
             # include Go dependencies used by tests and tooling.
             go-build-target: go-example/cmd/octocat.go
-            #
-            # All of the below have defaults, but can be overriden manually
-            detector-name: go snapshot action
-            detector-url: ${{ github.server_url }}/${{ github.repository }}
-            detector-version: 1.0.0
-            metadata: '{"lastModified": "22-04-2022"}'
 ```
