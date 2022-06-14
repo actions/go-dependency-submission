@@ -31,7 +31,7 @@ jobs:
             go-mod-path: go-example/go.mod
             #
             # Define the repo path of a build target (a file with a
-            # `main()` function) If not defined, this Aciton will collect all
+            # `main()` function) If not defined, this Action will collect all
             # dependencies used by all build targets for the module, which may
             # include Go dependencies used by tests and tooling.
             go-build-target: go-example/cmd/octocat.go
