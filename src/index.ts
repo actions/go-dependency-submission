@@ -15,9 +15,9 @@ async function main () {
   }
   const goModDir = path.dirname(goModPath)
 
-  let goBuildTarget = path.normalize(core.getInput('go-build-target'))
+  let goBuildTarget = core.getInput('go-build-target')
 
-  if (goBuildTarget !== 'all' && goBuildTarget !== '...') {
+  if (goBuildTarget !== 'all' && goBuildTarget !== './...') {
     if (!fs.existsSync(goBuildTarget)) {
       throw new Error(`The build target '${goBuildTarget}' does not exist`)
     }

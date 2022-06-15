@@ -55,8 +55,8 @@ function main() {
             throw new Error(`${goModPath} is not a go.mod file or does not exist!`);
         }
         const goModDir = path_1.default.dirname(goModPath);
-        let goBuildTarget = path_1.default.normalize(core.getInput('go-build-target'));
-        if (goBuildTarget !== 'all' && goBuildTarget !== '...') {
+        let goBuildTarget = core.getInput('go-build-target');
+        if (goBuildTarget !== 'all' && goBuildTarget !== './...') {
             if (!fs_1.default.existsSync(goBuildTarget)) {
                 throw new Error(`The build target '${goBuildTarget}' does not exist`);
             }
