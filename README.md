@@ -24,13 +24,13 @@ jobs:
         with:
           go-version: ">=1.18.0"
       - name: Run snapshot action
-        uses: @dsp-testing/go-snapshot-action
+        uses: @actions/go-dependency-submission@main
         with:
             # Required: Define the repo path to the go.mod file used by the
             # build target
             go-mod-path: go-example/go.mod
             #
-            # Define the repo path of a build target (a file with a
+            # Optinoal: Define the path of a build target (a file with a
             # `main()` function) If not defined, this Action will collect all
             # dependencies used by all build targets for the module, which may
             # include Go dependencies used by tests and tooling.
