@@ -1,0 +1,39 @@
+---
+version: 1
+ownership:
+  # ownership.yaml describes who is responsible for a service, and how to contact them. If your service is made up
+  # of multiple components, you can define multiple entries in this file.
+  #
+  # Additional documentation on ownership.yaml fields is available at: https://github.com/github/durable-ownership
+  # Questions? Ask in #sre
+  - team: github/dsp-dependency-graph
+    repo: https://github.com/actions/go-dependency-submission
+    name: go-dependency-submission
+    kind: moda
+    long_name: go-dependency-submission
+    description: 'This GitHub Action calculates dependencies for a Go build-target (a Go file with a main function) and submits the list to the Dependency submission API.'
+    maintainer: lseppala
+    exec_sponsor: rachelpotvin
+    product_manager: courtneycl
+    team_slack: dependency-graph
+    ops_slack: dg-alerts
+    qos: experimental
+    tier: 3
+    sev1:
+      tta: 3d
+      pagerduty: https://github.pagerduty.com/escalation_policies#P08OSWC
+      issue: https://github.com/github/dependency-graph/issues
+      slack: dg-alerts
+    sev2:
+      tta: 7d
+      issue: https://github.com/github/dependency-graph/issues
+      slack: dg-alerts
+    sev3:
+      tta: 14d
+      issue: https://github.com/github/dependency-graph/issues
+      slack: dg-alerts
+    support_squad:
+      slack: dependency-graph
+    dependencies:
+      - dependency-snapshots-api
+      - dependency-graph-api
