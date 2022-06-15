@@ -1,0 +1,18 @@
+name: Go Action detection of dependencies
+on:
+  push
+
+jobs:
+  go-action-detection:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 'Checkout Repository'
+        uses: actions/checkout@v3
+      - uses: actions/setup-go@v3
+        with:
+          go-version: ">=1.18.0"
+      - name: Run snapshot action
+        uses: dsp-testing/go-snapshot-action@main
+        with:
+          go-mod-path: go-example/go.mod
+          go-build-target: go-example/cmd/octocat.go
