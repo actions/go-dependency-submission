@@ -100,15 +100,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.parseGoModGraph = exports.parseGoList = void 0;
+exports.parseGoModGraph = exports.parseGoList = exports.parseGoPackage = void 0;
 const path_1 = __importDefault(__nccwpck_require__(1017));
 const packageurl_js_1 = __nccwpck_require__(8915);
 function parseGoPackage(pkg) {
     const [qualifiedPackage, version] = pkg.split('@');
-    const namespace = encodeURIComponent(path_1.default.dirname(qualifiedPackage));
-    const name = path_1.default.basename(qualifiedPackage);
+    let namespace = null;
+    let name;
+    if (qualifiedPackage.indexOf('/') !== -1) {
+        // need to URL-safe encode slashes in the namespace
+        namespace = encodeURIComponent(path_1.default.dirname(qualifiedPackage));
+        name = path_1.default.basename(qualifiedPackage);
+    }
+    else {
+        name = qualifiedPackage;
+    }
     return new packageurl_js_1.PackageURL('golang', namespace, name, version !== null && version !== void 0 ? version : null, null, null);
 }
+exports.parseGoPackage = parseGoPackage;
 /**
  * parseGoList parses a list of Go packages (one per line) matching the format
  * "${GO_PACKAGE}@v{VERSION}" into Package URLs. This expects the output of 'go
