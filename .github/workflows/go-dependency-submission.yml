@@ -1,5 +1,5 @@
 name: Go Dependency Submission
-on
+on:
   push:
     branches:
       - main
