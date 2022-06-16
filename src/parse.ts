@@ -1,10 +1,17 @@
 import path from 'path'
 import { PackageURL } from 'packageurl-js'
 
-function parseGoPackage (pkg: string): PackageURL {
+export function parseGoPackage (pkg: string): PackageURL {
   const [qualifiedPackage, version] = pkg.split('@')
-  const namespace = encodeURIComponent(path.dirname(qualifiedPackage))
-  const name = path.basename(qualifiedPackage)
+  let namespace: string | null = null
+  let name: string
+  if (qualifiedPackage.indexOf('/') !== -1) {
+    // need to URL-safe encode slashes in the namespace
+    namespace = encodeURIComponent(path.dirname(qualifiedPackage))
+    name = path.basename(qualifiedPackage)
+  } else {
+    name = qualifiedPackage
+  }
   return new PackageURL('golang', namespace, name, version ?? null, null, null)
 }
 
