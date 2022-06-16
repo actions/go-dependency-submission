@@ -10,19 +10,27 @@ on:
   push:
     branches:
       - main
+
+# The API requires write permission on the repository to submit dependencies
+permissions:
+  contents: write
+
 # Environment variables to configure Go and Go modules. Customize as necessary
 env:
   GOPROXY: '' # A Go Proxy server to be used
   GOPRIVATE: '' # A list of modules are considered private and not requested from GOPROXY
+
 jobs:
   go-action-detection:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout Repository'
         uses: actions/checkout@v3
+
       - uses: actions/setup-go@v3
         with:
           go-version: ">=1.18.0"
+
       - name: Run snapshot action
         uses: actions/go-dependency-submission@main
         with:
