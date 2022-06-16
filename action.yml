@@ -1,6 +1,6 @@
-name: 'Go Action for Creating Dependency Snapshots'
-description: 'Detects go dependencies in projects using go mod graph utility'
-author: 'lorenanicole'
+name: 'Go Dependency Submission'
+description: 'Calculates dependencies for a Go build-target and submits the list to the Dependency Submission API'
+author: 'GitHub'
 inputs:
   token:
     description: "GitHub Personal Access Token (PAT). Defaults to PAT provided by Action runner"
