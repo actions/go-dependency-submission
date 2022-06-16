@@ -10,7 +10,7 @@ on:
   push:
     branches:
       - main
-# Envionment variables to configure Go and Go modules. Customize as necessary
+# Environment variables to configure Go and Go modules. Customize as necessary
 env:
   GOPROXY: '' # A Go Proxy server to be used
   GOPRIVATE: '' # A list of modules are considered private and not requested from GOPROXY
@@ -30,7 +30,7 @@ jobs:
             # build target
             go-mod-path: go-example/go.mod
             #
-            # Optinoal: Define the path of a build target (a file with a
+            # Optional: Define the path of a build target (a file with a
             # `main()` function) If not defined, this Action will collect all
             # dependencies used by all build targets for the module, which may
             # include Go dependencies used by tests and tooling.
