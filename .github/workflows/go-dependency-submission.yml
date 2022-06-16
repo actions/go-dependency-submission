@@ -1,8 +1,12 @@
-name: Go Action detection of dependencies
-on:
+name: Go Dependency Submission
+on
   push:
     branches:
       - main
+
+# The API requires write permission on the repository to submit dependencies
+permissions:
+  contents: write
 
 jobs:
   go-action-detection:
@@ -10,9 +14,11 @@ jobs:
     steps:
       - name: 'Checkout Repository'
         uses: actions/checkout@v3
+
       - uses: actions/setup-go@v3
         with:
           go-version: ">=1.18.0"
+
       - name: Run snapshot action
         uses: actions/go-dependency-submission@main
         with:
