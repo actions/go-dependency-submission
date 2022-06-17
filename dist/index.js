@@ -75,8 +75,8 @@ function main() {
         const packageCache = yield (0, process_1.processGoGraph)(goModDir);
         const manifest = yield (0, process_1.processGoBuildTarget)(goModDir, goBuildTarget, packageCache);
         const snapshot = new dependency_submission_toolkit_1.Snapshot({
-            name: 'github-go-dependency-detector',
-            url: 'https://github.com/github/github-go-dependency-detector',
+            name: 'actions/go-dependency-submission',
+            url: 'https://github.com/actions/go-dependency-submission',
             version: '0.0.1'
         }, github.context, {
             correlator: `${github.context.job}-${goBuildTarget}`,
