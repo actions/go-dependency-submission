@@ -3590,6 +3590,17 @@ class PackageCache {
         return dep;
     }
     /**
+     * Provided a "matcher" object with any of the string fields 'namespace',
+     * 'name', or 'version', returns all packages matching fields specified by
+     * the matcher stored by the PackageCache
+     *
+     * @param {Object} matcher
+     * @returns {boolean}
+     */
+    packagesMatching(matcher) {
+        return Object.values(this.database).filter((pkg) => pkg.matching(matcher));
+    }
+    /**
      * addPackage adds a package, even if it already exists in the cache.
      *
      * @param {Package} pkg
@@ -3708,6 +3719,15 @@ class Package {
         return this.packageURL.toString();
     }
     /**
+     * namespace of the package
+     *
+     * @returns {string}
+     */
+    namespace() {
+        var _a;
+        return (_a = this.packageURL.namespace) !== null && _a !== void 0 ? _a : null;
+    }
+    /**
      * name of the package
      *
      * @returns {string}
@@ -3722,6 +3742,23 @@ class Package {
      */
     version() {
         return this.packageURL.version || '';
+    }
+    /**
+     * Provided a "matcher" object with any of the string fields 'namespace',
+     * 'name', or 'version', returns true if the Package has values matching the
+     * matcher.
+     *
+     * @param {Object} matcher
+     * @returns {boolean}
+     */
+    matching(matcher) {
+        // prettier-ignore
+        return ((matcher.namespace === undefined ||
+            this.packageURL.namespace === matcher.namespace) &&
+            (matcher.name === undefined ||
+                this.packageURL.name === matcher.name) &&
+            (matcher.version === undefined ||
+                this.packageURL.version === matcher.version));
     }
 }
 exports.Package = Package;
