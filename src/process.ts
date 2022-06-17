@@ -6,7 +6,7 @@ import { PackageCache } from '@github/dependency-submission-toolkit'
 
 import { parseGoModGraph, parseGoList } from './parse'
 
-export async function processGoGraph(
+export async function processGoGraph (
   goModDir: string,
   directDependencies: Array<PackageURL>,
   indirectDependencies: Array<PackageURL>
@@ -81,7 +81,7 @@ const GO_DIRECT_DEPS_TEMPLATE =
 const GO_INDIRECT_DEPS_TEMPLATE =
   '{{define "M"}}{{if .Indirect}}{{.Path}}@{{.Version}}{{end}}{{end}}{{with .Module}}{{if not .Main}}{{if .Replace}}{{template "M" .Replace}}{{else}}{{template "M" .}}{{end}}{{end}}{{end}}'
 
-export async function processGoDirectDependencies(
+export async function processGoDirectDependencies (
   goModDir: string,
   goBuildTarget: string
 ): Promise<Array<PackageURL>> {
@@ -91,7 +91,7 @@ export async function processGoDirectDependencies(
   return processGoList(goModDir, goBuildTarget, GO_DIRECT_DEPS_TEMPLATE)
 }
 
-export async function processGoIndirectDependencies(
+export async function processGoIndirectDependencies (
   goModDir: string,
   goBuildTarget: string
 ): Promise<Array<PackageURL>> {
@@ -101,7 +101,7 @@ export async function processGoIndirectDependencies(
   return processGoList(goModDir, goBuildTarget, GO_INDIRECT_DEPS_TEMPLATE)
 }
 
-async function processGoList(
+async function processGoList (
   goModDir: string,
   goBuildTarget: string,
   goListTemplate: string

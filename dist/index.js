@@ -259,13 +259,14 @@ function processGoGraph(goModDir, directDependencies, indirectDependencies) {
              * build target list. Go does not support multiple versions of the same
              * package */
             const matches = cache.packagesMatching(matcher);
-            console.log('matcher:', matcher, 'parentPkg:', parentPkg, 'childPkg:', childPkg);
+            if (matches.length === 0)
+                return;
             if (matches.length !== 1) {
-                throw new Error('assertion failed: expected one package in cache with namespace+name. ' +
+                throw new Error('assertion failed: expected no more than one package in cache with namespace+name. ' +
                     'Found: ' +
                     JSON.stringify(matches) +
-                    '\n' +
-                    `matcher: ${matcher} parentPkg: ${parentPkg} childPkg: ${childPkg}`);
+                    'for ' +
+                    JSON.stringify(matcher));
             }
             // create the dependency relationship
             targetPackage.dependsOn(matches[0]);
