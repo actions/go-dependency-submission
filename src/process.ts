@@ -50,6 +50,15 @@ export async function processGoGraph (
      * build target list. Go does not support multiple versions of the same
      * package */
     const matches = cache.packagesMatching(matcher)
+
+    console.log(
+      'matcher:',
+      matcher,
+      'parentPkg:',
+      parentPkg,
+      'childPkg:',
+      childPkg
+    )
     if (matches.length !== 1) {
       throw new Error(
         'assertion failed: expected one package in cache with namespace+name. ' +
