@@ -6,7 +6,7 @@ import { PackageCache } from '@github/dependency-submission-toolkit'
 
 import { parseGoModGraph, parseGoList } from './parse'
 
-export async function processGoGraph (
+export async function processGoGraph(
   goModDir: string,
   directDependencies: Array<PackageURL>,
   indirectDependencies: Array<PackageURL>
@@ -51,21 +51,15 @@ export async function processGoGraph (
      * package */
     const matches = cache.packagesMatching(matcher)
 
-    console.log(
-      'matcher:',
-      matcher,
-      'parentPkg:',
-      parentPkg,
-      'childPkg:',
-      childPkg
-    )
+    if (matches.length === 0) return
+
     if (matches.length !== 1) {
       throw new Error(
-        'assertion failed: expected one package in cache with namespace+name. ' +
+        'assertion failed: expected no more than one package in cache with namespace+name. ' +
           'Found: ' +
           JSON.stringify(matches) +
-          '\n' +
-          `matcher: ${matcher} parentPkg: ${parentPkg} childPkg: ${childPkg}`
+          'for ' +
+          JSON.stringify(matcher)
       )
     }
     // create the dependency relationship
@@ -87,7 +81,7 @@ const GO_DIRECT_DEPS_TEMPLATE =
 const GO_INDIRECT_DEPS_TEMPLATE =
   '{{define "M"}}{{if .Indirect}}{{.Path}}@{{.Version}}{{end}}{{end}}{{with .Module}}{{if not .Main}}{{if .Replace}}{{template "M" .Replace}}{{else}}{{template "M" .}}{{end}}{{end}}{{end}}'
 
-export async function processGoDirectDependencies (
+export async function processGoDirectDependencies(
   goModDir: string,
   goBuildTarget: string
 ): Promise<Array<PackageURL>> {
@@ -97,7 +91,7 @@ export async function processGoDirectDependencies (
   return processGoList(goModDir, goBuildTarget, GO_DIRECT_DEPS_TEMPLATE)
 }
 
-export async function processGoIndirectDependencies (
+export async function processGoIndirectDependencies(
   goModDir: string,
   goBuildTarget: string
 ): Promise<Array<PackageURL>> {
@@ -107,7 +101,7 @@ export async function processGoIndirectDependencies (
   return processGoList(goModDir, goBuildTarget, GO_INDIRECT_DEPS_TEMPLATE)
 }
 
-async function processGoList (
+async function processGoList(
   goModDir: string,
   goBuildTarget: string,
   goListTemplate: string
