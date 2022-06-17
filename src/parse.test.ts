@@ -1,4 +1,4 @@
-import { parseGoList, parseGoModGraph } from './parse'
+import { parseGoPackage, parseGoList, parseGoModGraph } from './parse'
 
 const GO_DEPENDENCIES = `go.opentelemetry.io/otel/exporters/otlp/otlptrace/otlptracehttp@v1.7.0
 golang.org/x/sys@v0.0.0-20220317061510-51cd9980dadf
@@ -6,7 +6,28 @@ golang.org/x/text@v0.3.7
 golang.org/x/text@v0.3.7
 golang.org/x/text@v0.3.7`
 
-describe('test dependenciesProcessorFunc', () => {
+describe('parseGoPackage', () => {
+  it('parses a package with a namespace', () => {
+    expect(parseGoPackage('foo/bar@0.1.2').toString()).toEqual(
+      'pkg:golang/foo/bar@0.1.2'
+    )
+  })
+  // this test should pass, but packageurl-js is double URL-safe encoding the
+  // '%' to %25. It won't, however, URL-encode the  '/' that is represented by
+  // %2F.
+  it.skip('parses a package with a namespace with slashes', () => {
+    expect(parseGoPackage('foo/boo/bar@0.1.2').toString()).toEqual(
+      'pkg:golang/foo%2Fboo/bar@0.1.2'
+    )
+  })
+  it('parses a package without a namespace', () => {
+    expect(parseGoPackage('foo.io@0.1.2').toString()).toEqual(
+      'pkg:golang/foo.io@0.1.2'
+    )
+  })
+})
+
+describe('parseGoList', () => {
   test('parses output of go list command into dependencies', () => {
     const dependencies = parseGoList(GO_DEPENDENCIES)
 
@@ -49,7 +70,7 @@ describe('parseGoModGraph', () => {
     expect(assocList[0][0]).toEqual({
       type: 'golang',
       name: 'go-example',
-      namespace: '.', // we expect the namespace for the root package to process to dot
+      namespace: null,
       version: null,
       qualifiers: null,
       subpath: null
