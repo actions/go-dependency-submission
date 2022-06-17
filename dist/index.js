@@ -263,7 +263,9 @@ function processGoGraph(goModDir, directDependencies, indirectDependencies) {
             if (matches.length !== 1) {
                 throw new Error('assertion failed: expected one package in cache with namespace+name. ' +
                     'Found: ' +
-                    JSON.stringify(matches));
+                    JSON.stringify(matches) +
+                    '\n' +
+                    `matcher: ${matcher} parentPkg: ${parentPkg} childPkg: ${childPkg}`);
             }
             // create the dependency relationship
             targetPackage.dependsOn(matches[0]);
