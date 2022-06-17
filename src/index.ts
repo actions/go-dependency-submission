@@ -43,8 +43,8 @@ async function main () {
   )
   const snapshot = new Snapshot(
     {
-      name: 'github-go-dependency-detector',
-      url: 'https://github.com/github/github-go-dependency-detector',
+      name: 'actions/go-dependency-submission',
+      url: 'https://github.com/actions/go-dependency-submission',
       version: '0.0.1'
     },
     github.context,
