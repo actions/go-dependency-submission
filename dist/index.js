@@ -108,8 +108,7 @@ function parseGoPackage(pkg) {
     let namespace = null;
     let name;
     if (qualifiedPackage.indexOf('/') !== -1) {
-        // need to URL-safe encode slashes in the namespace
-        namespace = encodeURIComponent(path_1.default.dirname(qualifiedPackage));
+        namespace = path_1.default.dirname(qualifiedPackage);
         name = path_1.default.basename(qualifiedPackage);
     }
     else {

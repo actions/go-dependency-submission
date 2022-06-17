@@ -12,12 +12,9 @@ describe('parseGoPackage', () => {
       'pkg:golang/foo/bar@0.1.2'
     )
   })
-  // this test should pass, but packageurl-js is double URL-safe encoding the
-  // '%' to %25. It won't, however, URL-encode the  '/' that is represented by
-  // %2F.
-  it.skip('parses a package with a namespace with slashes', () => {
-    expect(parseGoPackage('foo/boo/bar@0.1.2').toString()).toEqual(
-      'pkg:golang/foo%2Fboo/bar@0.1.2'
+  it('parses a package with a namespace with slashes', () => {
+    expect(parseGoPackage('github.com/foo/bar@0.1.2').toString()).toEqual(
+      'pkg:golang/github.com/foo/bar@0.1.2'
     )
   })
   it('parses a package without a namespace', () => {
@@ -36,7 +33,7 @@ describe('parseGoList', () => {
       {
         type: 'golang',
         name: 'otlptracehttp',
-        namespace: 'go.opentelemetry.io%2Fotel%2Fexporters%2Fotlp%2Fotlptrace',
+        namespace: 'go.opentelemetry.io/otel/exporters/otlp/otlptrace',
         version: 'v1.7.0',
         qualifiers: null,
         subpath: null
@@ -44,7 +41,7 @@ describe('parseGoList', () => {
       {
         type: 'golang',
         name: 'sys',
-        namespace: 'golang.org%2Fx',
+        namespace: 'golang.org/x',
         version: 'v0.0.0-20220317061510-51cd9980dadf',
         qualifiers: null,
         subpath: null
@@ -52,7 +49,7 @@ describe('parseGoList', () => {
       {
         type: 'golang',
         name: 'text',
-        namespace: 'golang.org%2Fx',
+        namespace: 'golang.org/x',
         version: 'v0.3.7',
         qualifiers: null,
         subpath: null
@@ -88,7 +85,7 @@ github.com/mattn/go-colorable@v1.1.9 github.com/mattn/go-isatty@v0.0.12`)
         {
           type: 'golang',
           name: 'color',
-          namespace: 'github.com%2Ffatih',
+          namespace: 'github.com/fatih',
           version: 'v1.13.0',
           qualifiers: null,
           subpath: null
@@ -96,7 +93,7 @@ github.com/mattn/go-colorable@v1.1.9 github.com/mattn/go-isatty@v0.0.12`)
         {
           type: 'golang',
           name: 'go-isatty',
-          namespace: 'github.com%2Fmattn',
+          namespace: 'github.com/mattn',
           version: 'v0.0.14',
           qualifiers: null,
           subpath: null
@@ -106,7 +103,7 @@ github.com/mattn/go-colorable@v1.1.9 github.com/mattn/go-isatty@v0.0.12`)
         {
           type: 'golang',
           name: 'go-colorable',
-          namespace: 'github.com%2Fmattn',
+          namespace: 'github.com/mattn',
           version: 'v1.1.9',
           qualifiers: null,
           subpath: null
@@ -114,7 +111,7 @@ github.com/mattn/go-colorable@v1.1.9 github.com/mattn/go-isatty@v0.0.12`)
         {
           type: 'golang',
           name: 'go-isatty',
-          namespace: 'github.com%2Fmattn',
+          namespace: 'github.com/mattn',
           version: 'v0.0.12',
           qualifiers: null,
           subpath: null
