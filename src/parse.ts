@@ -6,8 +6,7 @@ export function parseGoPackage (pkg: string): PackageURL {
   let namespace: string | null = null
   let name: string
   if (qualifiedPackage.indexOf('/') !== -1) {
-    // need to URL-safe encode slashes in the namespace
-    namespace = encodeURIComponent(path.dirname(qualifiedPackage))
+    namespace = path.dirname(qualifiedPackage)
     name = path.basename(qualifiedPackage)
   } else {
     name = qualifiedPackage
