@@ -34,3 +34,4 @@ jobs:
 
       - name: Verify no uncommitted files
         run: [ -z "$(git status --porcelain=v1 2>/dev/null)" ]
+        shell: bash
