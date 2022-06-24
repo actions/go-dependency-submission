@@ -10,7 +10,7 @@ import { processGoGraph, processGoBuildTarget } from './process'
 async function main () {
   const goModPath = path.normalize(core.getInput('go-mod-path'))
 
-  if (path.basename(goModPath) !== 'go.mod' && fs.existsSync(goModPath)) {
+  if (path.basename(goModPath) !== 'go.mod' || !fs.existsSync(goModPath)) {
     throw new Error(`${goModPath} is not a go.mod file or does not exist!`)
   }
   const goModDir = path.dirname(goModPath)
