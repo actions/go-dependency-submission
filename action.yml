@@ -12,6 +12,7 @@ inputs:
   go-mod-path:
     required: true
     description: 'Repo path to the go.mod file used to detect dependencies for the Go build target'
+    default: 'go.mod'
   go-build-target:
     required: true
     description: 'Build target to detect build dependencies. If unspecified, will use "all", with will detect all dependencies used in all build targets (including tests and tools).'
