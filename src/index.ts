@@ -3,9 +3,17 @@ import fs from 'fs'
 
 import * as core from '@actions/core'
 import * as github from '@actions/github'
-import { Snapshot, submitSnapshot } from '@github/dependency-submission-toolkit'
+import {
+  Snapshot,
+  Manifest,
+  submitSnapshot
+} from '@github/dependency-submission-toolkit'
 
-import { processGoGraph, processGoBuildTarget } from './process'
+import {
+  processGoGraph,
+  processGoDirectDependencies,
+  processGoIndirectDependencies
+} from './process'
 
 async function main () {
   const goModPath = path.normalize(core.getInput('go-mod-path'))
@@ -35,12 +43,39 @@ async function main () {
     }
   }
 
-  const packageCache = await processGoGraph(goModDir)
-  const manifest = await processGoBuildTarget(
+  const directDeps = await processGoDirectDependencies(goModDir, goBuildTarget)
+  const indirectDeps = await processGoIndirectDependencies(
     goModDir,
-    goBuildTarget,
-    packageCache
+    goBuildTarget
   )
+  const packageCache = await processGoGraph(goModDir, directDeps, indirectDeps)
+  // no file path if using the pseudotargets "all" or "./..."
+  const filepath =
+    goBuildTarget === 'all' || goBuildTarget === './...'
+      ? undefined
+      : path.join(goModDir, goBuildTarget)
+  const manifest = new Manifest(goBuildTarget, filepath)
+
+  directDeps.forEach((pkgUrl) => {
+    const dep = packageCache.lookupPackage(pkgUrl)
+    if (!dep) {
+      throw new Error(
+        'assertion failed: expected all direct dependencies to have entries in PackageCache'
+      )
+    }
+    manifest.addDirectDependency(dep)
+  })
+
+  indirectDeps.forEach((pkgUrl) => {
+    const dep = packageCache.lookupPackage(pkgUrl)
+    if (!dep) {
+      throw new Error(
+        'assertion failed: expected all indirect dependencies to have entries in PackageCache'
+      )
+    }
+    manifest.addIndirectDependency(dep)
+  })
+
   const snapshot = new Snapshot(
     {
       name: 'actions/go-dependency-submission',
