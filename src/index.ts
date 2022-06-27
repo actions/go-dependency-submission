@@ -51,10 +51,10 @@ async function main () {
     goBuildTarget
   )
   const packageCache = await processGoGraph(goModDir, directDeps, indirectDeps)
-  // no file path if using the pseudotargets "all" or "./..."
+  // if using the pseudotargets "all" or "./...", use the goModDir as filepath
   const filepath =
     goBuildTarget === 'all' || goBuildTarget === './...'
-      ? undefined
+      ? goModDir
       : path.join(goModDir, goBuildTarget)
   const manifest = new Manifest(goBuildTarget, filepath)
 
