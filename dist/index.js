@@ -50,8 +50,8 @@ const dependency_submission_toolkit_1 = __nccwpck_require__(9810);
 const process_1 = __nccwpck_require__(4077);
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const goModPath = path_1.default.normalize(core.getInput('go-mod-path'));
-        if (path_1.default.basename(goModPath) !== 'go.mod' && fs_1.default.existsSync(goModPath)) {
+        const goModPath = path_1.default.normalize(core.getInput('go-mod-path', { required: true }));
+        if (path_1.default.basename(goModPath) !== 'go.mod' || !fs_1.default.existsSync(goModPath)) {
             throw new Error(`${goModPath} is not a go.mod file or does not exist!`);
         }
         const goModDir = path_1.default.dirname(goModPath);
