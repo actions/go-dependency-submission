@@ -3,6 +3,20 @@
 This GitHub Action calculates dependencies for a Go build-target (a Go file with a
 `main` function) and submits the list to the [Dependency submission API](https://docs.github.com/en/code-security/supply-chain-security/understanding-your-software-supply-chain/using-the-dependency-submission-api). Dependencies then appear in your repository's dependency graph, and you'll receive Dependabot alerts and updates for vulnerable or out-of-date dependencies. 
 
+### Running locally
+
+In order for NPM install to succeed (and not 401) you need to login to github's NPM feed: 
+```
+npm login --scope=@github --registry=https://npm.pkg.github.com
+```
+
+Because we are checking in the Typescript output, you may see check failures if you don't generate the contents of `dist/` in a similar manner to our CI check. You can easily rectify this by regenerating in a codespace and using what we use in our workflow YAML:
+
+```
+npm ci --ignore-scripts
+npm rebuild && npm run all
+```
+
 ### Example
 ```yaml
 name: Go Dependency Submission
