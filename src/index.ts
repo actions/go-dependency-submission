@@ -1,6 +1,5 @@
 import path from 'path'
 import fs from 'fs'
-
 import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {
@@ -51,10 +50,10 @@ async function main () {
     goBuildTarget
   )
   const packageCache = await processGoGraph(goModDir, directDeps, indirectDeps)
-  // if using the pseudotargets "all" or "./...", use the goModDir as filepath
+  // if using the pseudotargets "all" or "./...", use the path to go.mod as filepath
   const filepath =
     goBuildTarget === 'all' || goBuildTarget === './...'
-      ? goModDir
+      ? goModPath
       : path.join(goModDir, goBuildTarget)
   const manifest = new Manifest(goBuildTarget, filepath)
 
