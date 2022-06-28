@@ -75,9 +75,9 @@ function main() {
         const directDeps = yield (0, process_1.processGoDirectDependencies)(goModDir, goBuildTarget);
         const indirectDeps = yield (0, process_1.processGoIndirectDependencies)(goModDir, goBuildTarget);
         const packageCache = yield (0, process_1.processGoGraph)(goModDir, directDeps, indirectDeps);
-        // no file path if using the pseudotargets "all" or "./..."
+        // if using the pseudotargets "all" or "./...", use the path to go.mod as filepath
         const filepath = goBuildTarget === 'all' || goBuildTarget === './...'
-            ? undefined
+            ? goModPath
             : path_1.default.join(goModDir, goBuildTarget);
         const manifest = new dependency_submission_toolkit_1.Manifest(goBuildTarget, filepath);
         directDeps.forEach((pkgUrl) => {
