@@ -5,11 +5,6 @@ This GitHub Action calculates dependencies for a Go build-target (a Go file with
 
 ### Running locally
 
-In order for NPM install to succeed (and not 401) you need to login to github's NPM feed: 
-```
-npm login --scope=@github --registry=https://npm.pkg.github.com
-```
-
 Because we are checking in the Typescript output, you may see check failures if you don't generate the contents of `dist/` in a similar manner to our CI check. You can easily rectify this by regenerating in a codespace and using what we use in our workflow YAML:
 
 ```
