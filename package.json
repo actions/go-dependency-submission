@@ -43,7 +43,7 @@
     "@actions/core": "^1.9.1",
     "@actions/exec": "^1.1.1",
     "@actions/github": "^5.0.3",
-    "@github/dependency-submission-toolkit": "^1.2.2",
+    "@github/dependency-submission-toolkit": "^1.2.10",
     "packageurl-js": "^0.0.6"
   }
 }
