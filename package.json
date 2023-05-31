@@ -15,15 +15,15 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/dsp-testing/go-dependency-submission.git"
+    "url": "git+https://github.com/actions/go-dependency-submission.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/dsp-testing/go-dependency-submission/issues"
+    "url": "https://github.com/actions/go-dependency-submission/issues"
   },
-  "homepage": "https://github.com/dsp-testing/go-dependency-submission#readme",
+  "homepage": "https://github.com/actions/go-dependency-submission#readme",
   "devDependencies": {
     "@types/jest": "^27.5.2",
     "@typescript-eslint/eslint-plugin": "^5.20.0",
