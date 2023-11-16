@@ -18,5 +18,5 @@ inputs:
     description: 'Build target to detect build dependencies. If unspecified, will use "all", with will detect all dependencies used in all build targets (including tests and tools).'
     default: 'all'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
