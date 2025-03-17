@@ -5,8 +5,8 @@
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
-    "format": "prettier --write '**/*.ts'",
-    "format-check": "prettier --check '**/*.ts'",
+    "format": "npx prettier --write '**/*.ts'",
+    "format-check": "npx prettier --check '**/*.ts'",
     "lint": "eslint --fix src/**/*.ts",
     "package": "ncc build --source-map --license licenses.txt",
     "test": "jest --testTimeout=10000",
@@ -36,14 +36,15 @@
     "eslint-plugin-n": "^15.1.0",
     "eslint-plugin-promise": "^6.0.0",
     "jest": "^28.0.0",
+    "prettier": "^3.5.3",
     "ts-jest": "^28.0.4",
     "typescript": "^4.6.4"
   },
   "dependencies": {
     "@actions/core": "^1.9.1",
     "@actions/exec": "^1.1.1",
-    "@actions/github": "^5.0.3",
-    "@github/dependency-submission-toolkit": "^1.2.10",
+    "@actions/github": "^6.0.0",
+    "@github/dependency-submission-toolkit": "^2.0.4",
     "packageurl-js": "^0.0.6"
   }
 }
