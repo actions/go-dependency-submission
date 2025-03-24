@@ -5,4 +5,7 @@ module.exports = {
   },
   testEnvironment: 'node',
   moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
+  transformIgnorePatterns: [
+    '/node_modules/(?!@octokit|@github)',
+  ],
 };
