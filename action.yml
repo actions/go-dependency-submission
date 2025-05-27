@@ -17,6 +17,30 @@ inputs:
     required: true
     description: 'Build target to detect build dependencies. If unspecified, will use "all", with will detect all dependencies used in all build targets (including tests and tools).'
     default: 'all'
+  snapshot-sha:
+    description: The SHA that the results will be linked to in the dependency snapshot
+    type: string
+    required: false
+    default: ''
+  snapshot-ref:
+    description: The ref that the results will be linked to in the dependency snapshot
+    type: string
+    required: false
+    default: ''
+
+  # If any of detector-name, detector-version, or detector-url are provided, they all have to be provided.  Defaults will be used if any are not provided.
+  detector-name:
+    description: The name of the detector that generated the dependency snapshot
+    type: string
+    required: false
+  detector-version:
+    description: The version of the detector that generated the dependency snapshot
+    type: string
+    required: false
+  detector-url:
+    description: The URL to the detector that generated the dependency snapshot
+    type: string
+    required: false
 runs:
   using: 'node20'
   main: 'dist/index.js'

@@ -77,12 +77,32 @@ async function main () {
     manifest.addIndirectDependency(dep)
   })
 
-  const snapshot = new Snapshot(
-    {
+  type SnapshotDetector = {
+    name: string;
+    url: string;
+    version: string;
+  };
+  var snapshotDetector: SnapshotDetector;
+  
+  // If detector name is passed in, then url and version are required inputs
+  // Otherwise, default values will be used to maintain backwards compatibility
+  const detectorName = core.getInput('detector-name');
+  if (detectorName !== '') {
+    snapshotDetector = {
+      name: detectorName,
+      url: core.getInput('detector-url', { required: true }),
+      version: core.getInput('detector-version', { required: true })
+    }
+  } else {
+    snapshotDetector = {
       name: 'actions/go-dependency-submission',
       url: 'https://github.com/actions/go-dependency-submission',
       version: '0.0.1'
-    },
+    }
+  }
+
+  const snapshot = new Snapshot(
+    snapshotDetector,
     github.context,
     {
       correlator: `${github.context.job}-${goBuildTarget}`,
@@ -90,6 +110,9 @@ async function main () {
     }
   )
   snapshot.addManifest(manifest)
+  snapshot.sha = core.getInput('snapshot-sha')
+  snapshot.ref = core.getInput('snapshot-ref')
+
   submitSnapshot(snapshot)
 }
 
