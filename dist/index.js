@@ -94,17 +94,58 @@ function main() {
             }
             manifest.addIndirectDependency(dep);
         });
-        const snapshot = new dependency_submission_toolkit_1.Snapshot({
-            name: 'actions/go-dependency-submission',
-            url: 'https://github.com/actions/go-dependency-submission',
-            version: '0.0.1'
-        }, github.context, {
+        let snapshotDetector;
+        const detectorName = core.getInput('detector-name');
+        const detectorUrl = core.getInput('detector-url');
+        const detectorVersion = core.getInput('detector-version');
+        if (detectorName === '' && detectorUrl === '' && detectorVersion === '') {
+            // use defaults if none are specified
+            snapshotDetector = {
+                name: 'actions/go-dependency-submission',
+                url: 'https://github.com/actions/go-dependency-submission',
+                version: '0.0.1'
+            };
+        }
+        else if (detectorName === '' || detectorUrl === '' || detectorVersion === '') {
+            // if any of detectorName, detectorUrl, or detectorVersion have value, then they are all required
+            throw new Error("Invalid input: if any of 'detector-name', 'detector-url', or 'detector-version' have value, then thay are all required.");
+        }
+        else {
+            // use inputs since all are specified
+            snapshotDetector = {
+                name: detectorName,
+                url: core.getInput('detector-url', { required: true }),
+                version: core.getInput('detector-version', { required: true })
+            };
+        }
+        const snapshot = new dependency_submission_toolkit_1.Snapshot(snapshotDetector, github.context, {
             correlator: `${github.context.job}-${goBuildTarget}`,
             id: github.context.runId.toString()
         });
         snapshot.addManifest(manifest);
+        snapshot.sha = core.getInput('snapshot-sha') && getShaFromContext();
+        snapshot.ref = core.getInput('snapshot-ref') && github.context.ref;
         (0, dependency_submission_toolkit_1.submitSnapshot)(snapshot);
     });
+}
+function getShaFromContext() {
+    const context = github.context;
+    const pullRequestEvents = [
+        'pull_request',
+        'pull_request_comment',
+        'pull_request_review',
+        'pull_request_review_comment'
+        // Note that pull_request_target is omitted here.
+        // That event runs in the context of the base commit of the PR,
+        // so the snapshot should not be associated with the head commit.
+    ];
+    if (pullRequestEvents.includes(context.eventName)) {
+        const pr = context.payload.pull_request;
+        return pr.head.sha;
+    }
+    else {
+        return context.sha;
+    }
 }
 main();
 
