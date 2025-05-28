@@ -7,6 +7,7 @@ import {
   Manifest,
   submitSnapshot
 } from '@github/dependency-submission-toolkit'
+import type {PullRequestEvent} from '@octokit/webhooks-types'
 
 import {
   processGoGraph,
@@ -82,22 +83,31 @@ async function main () {
     url: string;
     version: string;
   };
-  var snapshotDetector: SnapshotDetector;
+  let snapshotDetector: SnapshotDetector;
   
-  // If detector name is passed in, then url and version are required inputs
-  // Otherwise, default values will be used to maintain backwards compatibility
+
   const detectorName = core.getInput('detector-name');
-  if (detectorName !== '') {
-    snapshotDetector = {
-      name: detectorName,
-      url: core.getInput('detector-url', { required: true }),
-      version: core.getInput('detector-version', { required: true })
-    }
-  } else {
+  const detectorUrl = core.getInput('detector-url');
+  const detectorVersion = core.getInput('detector-version');
+
+  if (detectorName === '' && detectorUrl === '' && detectorVersion === '') {
+    // use defaults if none are specified
     snapshotDetector = {
       name: 'actions/go-dependency-submission',
       url: 'https://github.com/actions/go-dependency-submission',
       version: '0.0.1'
+    }
+  } else if (detectorName === '' || detectorUrl === '' || detectorVersion === '') {
+    // if any of detectorName, detectorUrl, or detectorVersion have value, then they are all required
+    throw new Error(
+      "Invalid input: if any of 'detector-name', 'detector-url', or 'detector-version' have value, then thay are all required."
+    );     
+  } else {
+    // use inputs since all are specified
+    snapshotDetector = {
+      name: detectorName,
+      url: core.getInput('detector-url', { required: true }),
+      version: core.getInput('detector-version', { required: true })
     }
   }
 
@@ -110,10 +120,29 @@ async function main () {
     }
   )
   snapshot.addManifest(manifest)
-  snapshot.sha = core.getInput('snapshot-sha')
-  snapshot.ref = core.getInput('snapshot-ref')
+  snapshot.sha = core.getInput('snapshot-sha', getShaFromContext())
+  snapshot.ref = core.getInput('snapshot-ref', github.context.ref)
 
   submitSnapshot(snapshot)
+}
+
+function getShaFromContext(): string {
+    const context = github.context
+    const pullRequestEvents = [
+        'pull_request',
+        'pull_request_comment',
+        'pull_request_review',
+        'pull_request_review_comment'
+        // Note that pull_request_target is omitted here.
+        // That event runs in the context of the base commit of the PR,
+        // so the snapshot should not be associated with the head commit.
+    ]
+    if (pullRequestEvents.includes(context.eventName)) {
+        const pr = (context.payload as PullRequestEvent).pull_request
+        return pr.head.sha
+    } else {
+        return context.sha
+    }
 }
 
 main()
