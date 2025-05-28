@@ -120,8 +120,8 @@ async function main () {
     }
   )
   snapshot.addManifest(manifest)
-  snapshot.sha = core.getInput('snapshot-sha', getShaFromContext())
-  snapshot.ref = core.getInput('snapshot-ref', github.context.ref)
+  snapshot.sha = core.getInput('snapshot-sha') && getShaFromContext()
+  snapshot.ref = core.getInput('snapshot-ref') && github.context.ref
 
   submitSnapshot(snapshot)
 }
