@@ -28,19 +28,23 @@ inputs:
     required: false
     default: ''
 
-  # If any of detector-name, detector-version, or detector-url are provided, they all have to be provided.  Defaults will be used if any are not provided.
+  # If any of detector-name, detector-version, or detector-url are provided, they all have to be provided.  
+  # Defaults will be used if none are not provided.  If only one or two are provided, the action will fail.
   detector-name:
     description: The name of the detector that generated the dependency snapshot
     type: string
     required: false
+    default: ''
   detector-version:
     description: The version of the detector that generated the dependency snapshot
     type: string
     required: false
+    default: ''
   detector-url:
     description: The URL to the detector that generated the dependency snapshot
     type: string
     required: false
+    default: ''
 runs:
   using: 'node20'
   main: 'dist/index.js'
