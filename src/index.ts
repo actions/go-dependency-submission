@@ -95,7 +95,11 @@ async function main () {
       url: 'https://github.com/actions/go-dependency-submission',
       version: '0.0.1'
     }
-  } else if (detectorName === '' || detectorUrl === '' || detectorVersion === '') {
+  } else if (
+    detectorName === '' ||
+    detectorUrl === '' ||
+    detectorVersion === ''
+  ) {
     // if any of detectorName, detectorUrl, or detectorVersion have value, then they are all required
     throw new Error(
       "Invalid input: if any of 'detector-name', 'detector-url', or 'detector-version' have value, then thay are all required."

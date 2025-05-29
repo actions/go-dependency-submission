@@ -125,29 +125,10 @@ function main() {
             id: github.context.runId.toString()
         });
         snapshot.addManifest(manifest);
-        snapshot.sha = core.getInput('snapshot-sha') && getShaFromContext();
-        snapshot.ref = core.getInput('snapshot-ref') && github.context.ref;
+        snapshot.sha = core.getInput('snapshot-sha');
+        snapshot.ref = core.getInput('snapshot-ref');
         (0, dependency_submission_toolkit_1.submitSnapshot)(snapshot);
     });
-}
-function getShaFromContext() {
-    const context = github.context;
-    const pullRequestEvents = [
-        'pull_request',
-        'pull_request_comment',
-        'pull_request_review',
-        'pull_request_review_comment'
-        // Note that pull_request_target is omitted here.
-        // That event runs in the context of the base commit of the PR,
-        // so the snapshot should not be associated with the head commit.
-    ];
-    if (pullRequestEvents.includes(context.eventName)) {
-        const pr = context.payload.pull_request;
-        return pr.head.sha;
-    }
-    else {
-        return context.sha;
-    }
 }
 main();
 
