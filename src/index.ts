@@ -118,8 +118,18 @@ async function main () {
     id: github.context.runId.toString()
   })
   snapshot.addManifest(manifest)
-  snapshot.sha = core.getInput('snapshot-sha')
-  snapshot.ref = core.getInput('snapshot-ref')
+
+  const inputSHA = core.getInput('sha')
+  if (inputSHA !== '') {
+    // only set the SHA if it is not empty; otherwise, use the SHA from the context
+    snapshot.sha = inputSHA
+  }
+
+  const inputRef = core.getInput('ref')
+  if (inputRef !== '') {
+    // only set the ref if it is not empty; otherwise, use the ref from the context
+    snapshot.ref = inputRef
+  }
 
   submitSnapshot(snapshot)
 }
