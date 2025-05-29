@@ -125,14 +125,16 @@ function main() {
             id: github.context.runId.toString()
         });
         snapshot.addManifest(manifest);
+        // only override the sha if the input has a value
+        // otherwise, continue to use the sha set from the context in the Snapshot constructor
         const inputSHA = core.getInput('sha');
         if (inputSHA !== '') {
-            // only set the SHA if it is not empty; otherwise, use the SHA from the context
             snapshot.sha = inputSHA;
         }
+        // only override the ref if the input has a value
+        // otherwise, continue to use the ref set from the context in the Snapshot constructor
         const inputRef = core.getInput('ref');
         if (inputRef !== '') {
-            // only set the ref if it is not empty; otherwise, use the ref from the context
             snapshot.ref = inputRef;
         }
         (0, dependency_submission_toolkit_1.submitSnapshot)(snapshot);
