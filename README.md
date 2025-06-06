@@ -100,7 +100,7 @@ permissions:
 
 # Environment variables to configure Go and Go modules. Customize as necessary
 env:
-  GOPROXY: '' # A Go Proxy server to be used
+  GOPROXY: 'https://proxy.golang.org,direct' # To add a private proxy, place it between the public golang proxy and direct
   GOPRIVATE: 'github.com/foo/*' # repositories in organization foo are considered private
 
 jobs:
