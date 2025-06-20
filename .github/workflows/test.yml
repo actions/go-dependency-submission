@@ -28,5 +28,10 @@ jobs:
         run: npm rebuild && npm run all
 
       - name: Verify no uncommitted files
-        run: '[ -z "$(git status --porcelain=v1 2>/dev/null)" ]'
+        run: |
+          if [ -n "$(git status --porcelain=v1 2>/dev/null)" ]; then
+            echo "There are uncommitted changes!"
+            git status --porcelain=v1
+            exit 1
+          fi
         shell: bash
