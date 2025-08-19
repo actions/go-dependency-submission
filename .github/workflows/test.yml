@@ -8,7 +8,10 @@ on: # rebuild any PRs and main branch changes
     branches:
       - main
       - 'releases/*'
-
+      
+permissions:
+  contents: read
+  
 jobs:
   build:
     runs-on: ubuntu-latest
