@@ -145,6 +145,41 @@ main();
 
 /***/ }),
 
+/***/ 786:
+/***/ ((__unused_webpack_module, exports) => {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", ({ value: true }));
+exports.findMatchingPackage = void 0;
+/**
+ * Finds the package in the cache that matches the given child PURL on both
+ * name and namespace. Treats null and undefined namespaces as equivalent so
+ * Go modules sharing a name (e.g. those ending in /go) are disambiguated.
+ */
+function findMatchingPackage(cache, childPkg) {
+    const matches = cache
+        .packagesMatching({ name: childPkg.name })
+        .filter((p) => { var _a, _b; return ((_a = p.packageURL.namespace) !== null && _a !== void 0 ? _a : null) === ((_b = childPkg.namespace) !== null && _b !== void 0 ? _b : null); });
+    if (matches.length === 0)
+        return undefined;
+    if (matches.length !== 1) {
+        throw new Error('assertion failed: expected no more than one package in cache with namespace+name. ' +
+            'Found: ' +
+            JSON.stringify(matches) +
+            ' for ' +
+            JSON.stringify({
+                name: childPkg.name,
+                namespace: childPkg.namespace
+            }));
+    }
+    return matches[0];
+}
+exports.findMatchingPackage = findMatchingPackage;
+
+
+/***/ }),
+
 /***/ 5933:
 /***/ (function(__unused_webpack_module, exports, __nccwpck_require__) {
 
@@ -254,6 +289,7 @@ const exec = __importStar(__nccwpck_require__(1514));
 const core = __importStar(__nccwpck_require__(2186));
 const dependency_submission_toolkit_1 = __nccwpck_require__(3415);
 const parse_1 = __nccwpck_require__(5933);
+const match_1 = __nccwpck_require__(786);
 function processGoGraph(goModDir, directDependencies, indirectDependencies) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log(`Running 'go mod graph' in ${goModDir}`);
@@ -281,29 +317,15 @@ function processGoGraph(goModDir, directDependencies, indirectDependencies) {
             const targetPackage = cache.lookupPackage(parentPkg);
             if (!targetPackage)
                 return;
-            /* Build a matcher to select on the namespace+name of the child package in
-             * the cache. The child package version specified by go mod graph is not
-             * the one guaranteed to be selected when building Go build targets. */
-            const matcher = {
-                name: childPkg.name
-            };
-            if (childPkg.namespace)
-                matcher.namespace = childPkg.namespace;
-            /* There should only ever be a single package with a namespace+name in the
-             * build target list. Go does not support multiple versions of the same
-             * package */
-            const matches = cache.packagesMatching(matcher);
-            if (matches.length === 0)
+            /* Look up the child package in the cache by namespace+name. The child
+             * version specified by go mod graph is not guaranteed to be the one
+             * selected when building Go build targets, so we match on
+             * namespace+name (which uniquely identifies a Go module). */
+            const match = (0, match_1.findMatchingPackage)(cache, childPkg);
+            if (!match)
                 return;
-            if (matches.length !== 1) {
-                throw new Error('assertion failed: expected no more than one package in cache with namespace+name. ' +
-                    'Found: ' +
-                    JSON.stringify(matches) +
-                    'for ' +
-                    JSON.stringify(matcher));
-            }
             // create the dependency relationship
-            targetPackage.dependsOn(matches[0]);
+            targetPackage.dependsOn(match);
         });
         return cache;
     });
