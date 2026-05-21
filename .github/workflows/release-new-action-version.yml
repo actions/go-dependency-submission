@@ -10,6 +10,9 @@ on:
 
 env:
   TAG_NAME: ${{ github.event.inputs.TAG_NAME || github.event.release.tag_name }}
+# TODO(supply-chain): Human review before hardening: this release workflow updates
+# tags with contents:write; verify environment protections, token scope, and
+# whether publish-action should be pinned to a full commit SHA.
 permissions:
   contents: write
 
