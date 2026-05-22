@@ -99,7 +99,7 @@ async function main () {
   ) {
     // if any of detectorName, detectorUrl, or detectorVersion have value, then they are all required
     throw new Error(
-      "Invalid input: if any of 'detector-name', 'detector-url', or 'detector-version' have value, then thay are all required."
+      "Invalid input: if any of 'detector-name', 'detector-url', or 'detector-version' have value, then they are all required."
     )
   } else {
     // use inputs since all are specified
