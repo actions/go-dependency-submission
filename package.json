@@ -47,10 +47,13 @@
     "typescript": "^4.6.4"
   },
   "dependencies": {
-    "@actions/core": "^1.9.1",
+    "@actions/core": "^1.11.1",
     "@actions/exec": "^1.1.1",
-    "@actions/github": "^6.0.0",
+    "@actions/github": "^6.0.1",
     "@github/dependency-submission-toolkit": "^2.0.5",
     "packageurl-js": "^0.0.6"
+  },
+  "overrides": {
+    "undici": "^6.24.0"
   }
 }
