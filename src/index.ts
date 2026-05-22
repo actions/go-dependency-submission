@@ -13,6 +13,7 @@ import {
   processGoDirectDependencies,
   processGoIndirectDependencies
 } from './process'
+import { getDefaultSnapshotDetector } from './detector'
 
 async function main () {
   const goModPath = path.normalize(
@@ -132,31 +133,4 @@ async function main () {
   submitSnapshot(snapshot)
 }
 
-export function getProjectVersion (): string {
-  const packageJsonPath = path.resolve(__dirname, '..', 'package.json')
-  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as {
-    version?: string
-  }
-
-  if (typeof packageJson.version !== 'string' || packageJson.version === '') {
-    throw new Error(`Invalid package version in ${packageJsonPath}`)
-  }
-
-  return packageJson.version
-}
-
-export function getDefaultSnapshotDetector (): {
-  name: string
-  url: string
-  version: string
-} {
-  return {
-    name: 'actions/go-dependency-submission',
-    url: 'https://github.com/actions/go-dependency-submission',
-    version: getProjectVersion()
-  }
-}
-
-if (require.main === module) {
-  main()
-}
+main()
