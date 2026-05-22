@@ -90,11 +90,7 @@ async function main () {
 
   if (detectorName === '' && detectorUrl === '' && detectorVersion === '') {
     // use defaults if none are specified
-    snapshotDetector = {
-      name: 'actions/go-dependency-submission',
-      url: 'https://github.com/actions/go-dependency-submission',
-      version: '0.0.1'
-    }
+    snapshotDetector = getDefaultSnapshotDetector()
   } else if (
     detectorName === '' ||
     detectorUrl === '' ||
@@ -136,4 +132,31 @@ async function main () {
   submitSnapshot(snapshot)
 }
 
-main()
+export function getProjectVersion (): string {
+  const packageJsonPath = path.resolve(__dirname, '..', 'package.json')
+  const packageJson = JSON.parse(fs.readFileSync(packageJsonPath, 'utf8')) as {
+    version?: string
+  }
+
+  if (typeof packageJson.version !== 'string' || packageJson.version === '') {
+    throw new Error(`Invalid package version in ${packageJsonPath}`)
+  }
+
+  return packageJson.version
+}
+
+export function getDefaultSnapshotDetector (): {
+  name: string
+  url: string
+  version: string
+} {
+  return {
+    name: 'actions/go-dependency-submission',
+    url: 'https://github.com/actions/go-dependency-submission',
+    version: getProjectVersion()
+  }
+}
+
+if (require.main === module) {
+  main()
+}
