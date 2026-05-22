@@ -13,6 +13,7 @@ import {
   processGoDirectDependencies,
   processGoIndirectDependencies
 } from './process'
+import { getDefaultSnapshotDetector } from './detector'
 
 async function main () {
   const goModPath = path.normalize(
@@ -90,11 +91,7 @@ async function main () {
 
   if (detectorName === '' && detectorUrl === '' && detectorVersion === '') {
     // use defaults if none are specified
-    snapshotDetector = {
-      name: 'actions/go-dependency-submission',
-      url: 'https://github.com/actions/go-dependency-submission',
-      version: '0.0.1'
-    }
+    snapshotDetector = getDefaultSnapshotDetector()
   } else if (
     detectorName === '' ||
     detectorUrl === '' ||
