@@ -13,6 +13,7 @@ import {
   processGoDirectDependencies,
   processGoIndirectDependencies
 } from './process'
+import { getDefaultSnapshotDetector } from './detector'
 
 async function main () {
   const goModPath = path.normalize(
@@ -90,11 +91,7 @@ async function main () {
 
   if (detectorName === '' && detectorUrl === '' && detectorVersion === '') {
     // use defaults if none are specified
-    snapshotDetector = {
-      name: 'actions/go-dependency-submission',
-      url: 'https://github.com/actions/go-dependency-submission',
-      version: '0.0.1'
-    }
+    snapshotDetector = getDefaultSnapshotDetector()
   } else if (
     detectorName === '' ||
     detectorUrl === '' ||
@@ -102,7 +99,7 @@ async function main () {
   ) {
     // if any of detectorName, detectorUrl, or detectorVersion have value, then they are all required
     throw new Error(
-      "Invalid input: if any of 'detector-name', 'detector-url', or 'detector-version' have value, then thay are all required."
+      "Invalid input: if any of 'detector-name', 'detector-url', or 'detector-version' have value, then they are all required."
     )
   } else {
     // use inputs since all are specified
@@ -121,14 +118,14 @@ async function main () {
 
   // only override the sha if the input has a value
   // otherwise, continue to use the sha set from the context in the Snapshot constructor
-  const inputSHA = core.getInput('sha')
+  const inputSHA = core.getInput('snapshot-sha')
   if (inputSHA !== '') {
     snapshot.sha = inputSHA
   }
 
   // only override the ref if the input has a value
   // otherwise, continue to use the ref set from the context in the Snapshot constructor
-  const inputRef = core.getInput('ref')
+  const inputRef = core.getInput('snapshot-ref')
   if (inputRef !== '') {
     snapshot.ref = inputRef
   }
