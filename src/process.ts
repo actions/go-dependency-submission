@@ -5,6 +5,7 @@ import * as core from '@actions/core'
 import { PackageCache } from '@github/dependency-submission-toolkit'
 
 import { parseGoModGraph, parseGoList } from './parse'
+import { findMatchingPackage } from './match'
 
 export async function processGoGraph (
   goModDir: string,
@@ -38,32 +39,15 @@ export async function processGoGraph (
     const targetPackage = cache.lookupPackage(parentPkg)
     if (!targetPackage) return
 
-    /* Build a matcher to select on the namespace+name of the child package in
-     * the cache. The child package version specified by go mod graph is not
-     * the one guaranteed to be selected when building Go build targets. */
-    const matcher: { name: string; namespace?: string } = {
-      name: childPkg.name
-    }
-    if (childPkg.namespace) matcher.namespace = childPkg.namespace
+    /* Look up the child package in the cache by namespace+name. The child
+     * version specified by go mod graph is not guaranteed to be the one
+     * selected when building Go build targets, so we match on
+     * namespace+name (which uniquely identifies a Go module). */
+    const match = findMatchingPackage(cache, childPkg)
+    if (!match) return
 
-    /* There should only ever be a single package with a namespace+name in the
-     * build target list. Go does not support multiple versions of the same
-     * package */
-    const matches = cache.packagesMatching(matcher)
-
-    if (matches.length === 0) return
-
-    if (matches.length !== 1) {
-      throw new Error(
-        'assertion failed: expected no more than one package in cache with namespace+name. ' +
-          'Found: ' +
-          JSON.stringify(matches) +
-          'for ' +
-          JSON.stringify(matcher)
-      )
-    }
     // create the dependency relationship
-    targetPackage.dependsOn(matches[0])
+    targetPackage.dependsOn(match)
   })
 
   return cache
