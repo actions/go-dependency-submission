@@ -121,14 +121,14 @@ async function main () {
 
   // only override the sha if the input has a value
   // otherwise, continue to use the sha set from the context in the Snapshot constructor
-  const inputSHA = core.getInput('sha')
+  const inputSHA = core.getInput('snapshot-sha')
   if (inputSHA !== '') {
     snapshot.sha = inputSHA
   }
 
   // only override the ref if the input has a value
   // otherwise, continue to use the ref set from the context in the Snapshot constructor
-  const inputRef = core.getInput('ref')
+  const inputRef = core.getInput('snapshot-ref')
   if (inputRef !== '') {
     snapshot.ref = inputRef
   }
