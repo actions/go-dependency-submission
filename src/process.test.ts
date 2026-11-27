@@ -6,6 +6,8 @@ import {
 
 // NOTE: these tests all require "go" to be installed and available on the PATH!
 //
+jest.setTimeout(60_000)
+
 describe('processGoDirectDependencies', () => {
   test('run in go-example', async () => {
     const purls = await processGoDirectDependencies(
